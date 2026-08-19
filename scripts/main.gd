@@ -32,6 +32,33 @@ func _ready() -> void:
 	level_up_draft.draft_completed.connect(shop.open_shop)
 	
 	_setup_street_lighting()
+	_setup_street_fog()
+
+func _setup_street_fog() -> void:
+	var fog = CPUParticles2D.new()
+	fog.amount = 26
+	fog.lifetime = 7.5
+	fog.preprocess = 3.5
+	fog.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	fog.emission_rect_extents = Vector2(850, 1200)
+	fog.direction = Vector2(1, 0.2)
+	fog.spread = 30.0
+	fog.gravity = Vector2.ZERO
+	fog.initial_velocity_min = 6.0
+	fog.initial_velocity_max = 18.0
+	fog.scale_amount_min = 28.0
+	fog.scale_amount_max = 56.0
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(0.4, 0.5, 0.75, 0.0),
+		Color(0.45, 0.55, 0.8, 0.07),
+		Color(0.4, 0.5, 0.75, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	fog.color_ramp = grad
+	
+	add_child(fog)
 
 func _setup_street_lighting() -> void:
 	# 1. Gece Mavisi Ortam Aydınlatması

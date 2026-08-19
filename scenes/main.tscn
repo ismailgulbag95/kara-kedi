@@ -1,23 +1,24 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="Texture2D" path="res://assets/textures/tile_floor.png" id="2_floor"]
-[ext_resource type="Texture2D" path="res://assets/textures/tile_wall.png" id="3_wall"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="4_player"]
-[ext_resource type="Script" path="res://scripts/wave_manager.gd" id="5_wave"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6_hud"]
-[ext_resource type="PackedScene" path="res://scenes/ui/virtual_joystick.tscn" id="7_vjoy"]
-[ext_resource type="PackedScene" path="res://scenes/ui/shop.tscn" id="8_shop"]
-[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="9_pause"]
-[ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="10_gover"]
-[ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="11_vict"]
-[ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="12_menu"]
-[ext_resource type="Shader" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="13_vignette"]
-[ext_resource type="PackedScene" path="res://scenes/ui/level_up_draft.tscn" id="14_ldraft"]
-[ext_resource type="PackedScene" path="res://scenes/ui/codex_modal.tscn" id="15_codex"]
+[ext_resource type="Texture2D" path="res://assets/textures/topdown_rooftop_floor.png" id="2_floor"]
+[ext_resource type="Texture2D" path="res://assets/textures/topdown_parapet_ledge.png" id="3_parapet"]
+[ext_resource type="Script" path="res://scripts/props/city_depth_manager.gd" id="4_city_depth"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="5_player"]
+[ext_resource type="Script" path="res://scripts/wave_manager.gd" id="6_wave"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/virtual_joystick.tscn" id="8_vjoy"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shop.tscn" id="9_shop"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="10_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="11_gover"]
+[ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="12_vict"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="13_menu"]
+[ext_resource type="Shader" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="14_vignette"]
+[ext_resource type="PackedScene" path="res://scenes/ui/level_up_draft.tscn" id="15_ldraft"]
+[ext_resource type="PackedScene" path="res://scenes/ui/codex_modal.tscn" id="16_codex"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
-shader = ExtResource("13_vignette")
+shader = ExtResource("14_vignette")
 shader_parameter/vignette_intensity = 0.35
 shader_parameter/vignette_radius = 0.88
 shader_parameter/scanline_count = 300.0
@@ -25,10 +26,8 @@ shader_parameter/scanline_intensity = 0.05
 shader_parameter/chromatic_aberration = 0.0
 shader_parameter/rage_intensity = 0.0
 
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_horiz"]
 size = Vector2(1440, 64)
-
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vert"]
 size = Vector2(64, 2100)
@@ -36,8 +35,28 @@ size = Vector2(64, 2100)
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
-[node name="Background" type="TextureRect" parent="."]
-modulate = Color(0.64, 0.67, 0.80, 1)
+[node name="OuterDeepStreet" type="TextureRect" parent="."]
+modulate = Color(0.08, 0.10, 0.15, 1)
+texture_repeat = 2
+offset_left = -3600.0
+offset_top = -3600.0
+offset_right = 3600.0
+offset_bottom = 3600.0
+texture = ExtResource("2_floor")
+stretch_mode = 1
+
+[node name="CityDepthManager" type="Node2D" parent="."]
+script = ExtResource("4_city_depth")
+
+[node name="RooftopAbyssShadow" type="ColorRect" parent="."]
+offset_left = -745.0
+offset_top = -1075.0
+offset_right = 745.0
+offset_bottom = 1075.0
+color = Color(0.01, 0.01, 0.03, 0.94)
+
+[node name="RooftopFloor" type="TextureRect" parent="."]
+modulate = Color(0.85, 0.88, 0.95, 1)
 texture_repeat = 2
 offset_left = -680.0
 offset_top = -1020.0
@@ -46,46 +65,45 @@ offset_bottom = 1020.0
 texture = ExtResource("2_floor")
 stretch_mode = 1
 
-[node name="WallVisualTop" type="TextureRect" parent="."]
-modulate = Color(0.72, 0.75, 0.88, 1)
+[node name="ParapetVisualTop" type="TextureRect" parent="."]
+modulate = Color(0.92, 0.95, 1.0, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
 offset_right = 720.0
 offset_bottom = -976.0
-texture = ExtResource("3_wall")
+texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="WallVisualBottom" type="TextureRect" parent="."]
-modulate = Color(0.72, 0.75, 0.88, 1)
+[node name="ParapetVisualBottom" type="TextureRect" parent="."]
+modulate = Color(0.92, 0.95, 1.0, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = 976.0
 offset_right = 720.0
 offset_bottom = 1040.0
-texture = ExtResource("3_wall")
+texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="WallVisualLeft" type="TextureRect" parent="."]
-modulate = Color(0.72, 0.75, 0.88, 1)
+[node name="ParapetVisualLeft" type="TextureRect" parent="."]
+modulate = Color(0.92, 0.95, 1.0, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
 offset_right = -656.0
 offset_bottom = 1040.0
-texture = ExtResource("3_wall")
+texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="WallVisualRight" type="TextureRect" parent="."]
-modulate = Color(0.72, 0.75, 0.88, 1)
+[node name="ParapetVisualRight" type="TextureRect" parent="."]
+modulate = Color(0.92, 0.95, 1.0, 1)
 texture_repeat = 2
 offset_left = 656.0
 offset_top = -1040.0
 offset_right = 720.0
 offset_bottom = 1040.0
-texture = ExtResource("3_wall")
+texture = ExtResource("3_parapet")
 stretch_mode = 1
-
 
 [node name="ArenaWalls" type="StaticBody2D" parent="."]
 collision_layer = 32
@@ -107,14 +125,19 @@ shape = SubResource("RectangleShape2D_vert")
 position = Vector2(688, 0)
 shape = SubResource("RectangleShape2D_vert")
 
-[node name="Player" parent="." instance=ExtResource("4_player")]
+[node name="Player" parent="." instance=ExtResource("5_player")]
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
-position_smoothing_speed = 8.0
+position_smoothing_speed = 7.0
+limit_left = -980
+limit_top = -1350
+limit_right = 980
+limit_bottom = 1350
+limit_smoothed = true
 
 [node name="WaveManager" type="Node2D" parent="."]
-script = ExtResource("5_wave")
+script = ExtResource("6_wave")
 
 [node name="VignetteOverlay" type="CanvasLayer" parent="."]
 layer = 4
@@ -128,31 +151,28 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="VirtualJoystick" parent="." instance=ExtResource("7_vjoy")]
+[node name="VirtualJoystick" parent="." instance=ExtResource("8_vjoy")]
 
-
-[node name="HUD" parent="." instance=ExtResource("6_hud")]
+[node name="HUD" parent="." instance=ExtResource("7_hud")]
 layer = 8
 
-[node name="Shop" parent="." instance=ExtResource("8_shop")]
+[node name="Shop" parent="." instance=ExtResource("9_shop")]
 layer = 10
 
-[node name="LevelUpDraft" parent="." instance=ExtResource("14_ldraft")]
+[node name="LevelUpDraft" parent="." instance=ExtResource("15_ldraft")]
 layer = 12
 
-[node name="PauseMenu" parent="." instance=ExtResource("9_pause")]
+[node name="PauseMenu" parent="." instance=ExtResource("10_pause")]
 layer = 15
 
-[node name="GameOver" parent="." instance=ExtResource("10_gover")]
+[node name="GameOver" parent="." instance=ExtResource("11_gover")]
 layer = 20
 
-[node name="VictoryScreen" parent="." instance=ExtResource("11_vict")]
+[node name="VictoryScreen" parent="." instance=ExtResource("12_vict")]
 layer = 25
 
-[node name="MainMenu" parent="." instance=ExtResource("12_menu")]
+[node name="MainMenu" parent="." instance=ExtResource("13_menu")]
 layer = 30
 
-[node name="CodexModal" parent="." instance=ExtResource("15_codex")]
+[node name="CodexModal" parent="." instance=ExtResource("16_codex")]
 layer = 35
-
-

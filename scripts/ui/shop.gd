@@ -384,6 +384,37 @@ func _update_weapon_slots_ui() -> void:
 		panel.add_child(vbox)
 		slots_container.add_child(panel)
 
+	# ⚡ Evrimleşme (Weapon Fusion) Butonlarını Ekle
+	var evos = GameManager.get_available_weapon_evolutions()
+	for evo in evos:
+		var evo_btn = Button.new()
+		evo_btn.text = "%s %s" % [evo["icon"], evo["name"]]
+		evo_btn.custom_minimum_size = Vector2(160, 48)
+		
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.65, 0.15, 0.85, 0.95)
+		style.border_width_left = 2
+		style.border_width_top = 2
+		style.border_width_right = 2
+		style.border_width_bottom = 2
+		style.border_color = Color(1.0, 0.85, 0.3, 1.0)
+		style.corner_radius_top_left = 8
+		style.corner_radius_top_right = 8
+		style.corner_radius_bottom_right = 8
+		style.corner_radius_bottom_left = 8
+		evo_btn.add_theme_stylebox_override("normal", style)
+		evo_btn.add_theme_font_size_override("font_size", 10)
+		evo_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.4))
+		
+		UIJuiceHelper.attach_button_juice(evo_btn, 0.94, 1.06)
+		var evo_data = evo
+		evo_btn.pressed.connect(func():
+			if GameManager.execute_weapon_evolution(evo_data):
+				_update_weapon_slots_ui()
+				_render_cards()
+		)
+		slots_container.add_child(evo_btn)
+
 
 func _populate_market_cards() -> void:
 	var new_offers: Array = []

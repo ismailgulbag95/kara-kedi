@@ -66,8 +66,8 @@ func open_pause_menu() -> void:
 
 func _update_display() -> void:
 	# En yüksek skor ve anlık skor güncellemesi
-	high_score_label.text = "🏆 EN YÜKSEK SKOR: %d" % GameManager.high_score
-	current_score_label.text = "Mevcut Skor: %d  |  Dalga: %d  |  Koin: %d" % [
+	high_score_label.text = "🏆 EN YÜKSEK ŞEHİR SKORU: %d" % GameManager.high_score
+	current_score_label.text = "Gece Skoru: %d  |  Baskın: %d / 15  |  Sermaye: %d 🐟" % [
 		GameManager.score,
 		GameManager.current_wave,
 		GameManager.coins

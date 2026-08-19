@@ -34,7 +34,10 @@ const WEAPON_SCENES = {
 	"yarn_bomb": preload("res://scenes/weapons/weapon_yarn_bomb.tscn"),
 	"magnum": preload("res://scenes/weapons/weapon_magnum.tscn"),
 	"glock": preload("res://scenes/weapons/weapon_glock.tscn"),
-	"bow": preload("res://scenes/weapons/weapon_bow.tscn")
+	"bow": preload("res://scenes/weapons/weapon_bow.tscn"),
+	"fused_yarn_boomerang": preload("res://scenes/weapons/weapon_yarn_bomb.tscn"),
+	"fused_claw_gun": preload("res://scenes/weapons/weapon_glock.tscn"),
+	"fused_storm_bow": preload("res://scenes/weapons/weapon_bow.tscn")
 }
 
 const PAW_PRINT_SCENE = preload("res://scenes/vfx/paw_print.tscn")

@@ -90,8 +90,123 @@ const TIER_MULTIPLIERS = {
 	4: 3.2
 }
 
+signal shelter_updated
+
+var whiskers: int = 50 # Kalıcı Kedi Mama Parası (Catnip Whiskers)
+var shelter_upgrades: Dictionary = {
+	"hp": 0,
+	"dmg": 0,
+	"speed": 0,
+	"luck": 0,
+	"coins": 0
+}
+
+const SAVE_FILE_PATH = "user://shelter_save.cfg"
+
+const WEAPON_EVOLUTIONS = [
+	{
+		"id": "fused_yarn_boomerang",
+		"name": "⚡ PATLAYICI YUMAK KASIRGASI",
+		"desc": "Çift Boomerang Yörüngesi & Devasa Patlama!",
+		"icon": "🌀",
+		"cost": 50,
+		"req": ["yarn_bomb", "fish_boomerang"]
+	},
+	{
+		"id": "fused_claw_gun",
+		"name": "⚡ OTOMATİK PENÇELİ TABANCA",
+		"desc": "Keskin Pençe Savurması + Mermi Yağmuru!",
+		"icon": "🔫",
+		"cost": 50,
+		"req": ["glock", "claws"]
+	},
+	{
+		"id": "fused_storm_bow",
+		"name": "⚡ FIRTINA YAYI",
+		"desc": "Delip Geçen Ok Patlaması & Kılıç Dalgaları!",
+		"icon": "🏹",
+		"cost": 50,
+		"req": ["bow", "sword"]
+	}
+]
+
+func save_shelter() -> void:
+	var cfg = ConfigFile.new()
+	cfg.set_value("shelter", "whiskers", whiskers)
+	cfg.set_value("shelter", "high_score", high_score)
+	for k in shelter_upgrades:
+		cfg.set_value("shelter", "lvl_" + k, shelter_upgrades[k])
+	cfg.save(SAVE_FILE_PATH)
+
+func load_shelter() -> void:
+	var cfg = ConfigFile.new()
+	if cfg.load(SAVE_FILE_PATH) == OK:
+		whiskers = cfg.get_value("shelter", "whiskers", 50)
+		high_score = cfg.get_value("shelter", "high_score", 0)
+		for k in shelter_upgrades:
+			shelter_upgrades[k] = cfg.get_value("shelter", "lvl_" + k, 0)
+	else:
+		whiskers = 50
+
+func get_shelter_cost(stat_key: String) -> int:
+	var lvl = shelter_upgrades.get(stat_key, 0)
+	return (lvl + 1) * 35
+
+func buy_shelter_upgrade(stat_key: String) -> bool:
+	var cost = get_shelter_cost(stat_key)
+	if whiskers >= cost:
+		var lvl = shelter_upgrades.get(stat_key, 0)
+		if lvl < 5:
+			whiskers -= cost
+			shelter_upgrades[stat_key] = lvl + 1
+			save_shelter()
+			shelter_updated.emit()
+			return true
+	return false
+
+func get_available_weapon_evolutions() -> Array:
+	var active_ids: Array = []
+	for w in equipped_weapons:
+		if w != null and w.get("tier", 1) >= 4:
+			active_ids.append(w.get("id", ""))
+			
+	var evos: Array = []
+	for evo in WEAPON_EVOLUTIONS:
+		var reqs = evo["req"]
+		if active_ids.has(reqs[0]) and active_ids.has(reqs[1]):
+			evos.append(evo)
+	return evos
+
+func execute_weapon_evolution(evo_data: Dictionary) -> bool:
+	var reqs = evo_data.get("req", [])
+	var slot1 = -1
+	var slot2 = -1
+	for i in range(3):
+		if equipped_weapons[i] != null:
+			var w_id = equipped_weapons[i].get("id", "")
+			if w_id == reqs[0] and slot1 == -1:
+				slot1 = i
+			elif w_id == reqs[1] and slot2 == -1:
+				slot2 = i
+				
+	if slot1 != -1 and slot2 != -1:
+		equipped_weapons[slot1] = {
+			"id": evo_data["id"],
+			"name": evo_data["name"],
+			"tier": 5,
+			"type": "weapon",
+			"cost": 60
+		}
+		equipped_weapons[slot2] = null
+		_recalculate_weapon_synergies()
+		weapons_updated.emit()
+		SoundManager.play_evolution()
+		return true
+	return false
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	load_shelter()
 	reset_game()
 
 func _process(delta: float) -> void:
@@ -184,8 +299,21 @@ func reset_game() -> void:
 	apply_character_archetype(selected_character)
 	locked_shop_cards.clear()
 	
-	coins = 0
-	total_coins_collected = 0
+	# Apply Persistent Shelter Upgrades
+	var hp_lvl = shelter_upgrades.get("hp", 0)
+	var dmg_lvl = shelter_upgrades.get("dmg", 0)
+	var spd_lvl = shelter_upgrades.get("speed", 0)
+	var luck_lvl = shelter_upgrades.get("luck", 0)
+	var coins_lvl = shelter_upgrades.get("coins", 0)
+	
+	max_hp += float(hp_lvl) * 10.0
+	current_hp = max_hp
+	damage_multiplier += float(dmg_lvl) * 0.08
+	move_speed += float(spd_lvl) * 10.0
+	coin_multiplier += float(luck_lvl) * 0.10
+	coins = coins_lvl * 25
+	
+	total_coins_collected = coins
 	score = 0
 	enemies_killed = 0
 	current_wave = 1

@@ -61,9 +61,9 @@ offset_top = 24.0
 offset_right = 200.0
 offset_bottom = 60.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
-theme_override_font_sizes/font_size = 28
-text = "KARA KEDİ YENİLDİ!"
+theme_override_colors/font_color = Color(1, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 22
+text = "🕯️ DOKUZ CAN DA TÜKENDİ..."
 horizontal_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="Control/Panel"]
@@ -80,11 +80,11 @@ offset_bottom = 60.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/line_spacing = 10
-theme_override_font_sizes/font_size = 20
-text = "Ulaşılan Dalga: 1
-Öldürülen Fare: 0
-Toplanan Koin: 0
-Toplam Puan: 0"
+theme_override_font_sizes/font_size = 18
+text = "Son Gece Baskını: 1 / 15
+Avlanan Fare Sürüsü: 0
+Toplanan Zula Parası: 0 🐟
+Toplam Şehir Puanı: 0"
 horizontal_alignment = 1
 
 [node name="RetryButton" type="Button" parent="Control/Panel"]
@@ -100,5 +100,5 @@ offset_right = 140.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_font_sizes/font_size = 20
-text = "YENİDEN DENE 🔄"
+theme_override_font_sizes/font_size = 18
+text = "🐾 SOKAKLARA DÖN 🔄"

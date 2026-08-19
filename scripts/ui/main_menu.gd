@@ -25,7 +25,44 @@ func _ready() -> void:
 	get_tree().paused = true
 	
 	_setup_codex_button()
+	_setup_shelter_button()
 	_setup_class_button(btn_standard, card_standard, "standard")
+
+func _setup_shelter_button() -> void:
+	var s_btn = Button.new()
+	s_btn.text = "🛖 BARINAK (MAMA AĞACI)"
+	s_btn.custom_minimum_size = Vector2(0, 34)
+	s_btn.anchor_left = 0.0
+	s_btn.anchor_top = 1.0
+	s_btn.anchor_right = 0.5
+	s_btn.anchor_bottom = 1.0
+	s_btn.offset_left = 12
+	s_btn.offset_right = -6
+	s_btn.offset_top = -48
+	s_btn.offset_bottom = -14
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.18, 0.14, 0.08, 0.95)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(1.0, 0.75, 0.25, 1.0)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	s_btn.add_theme_stylebox_override("normal", style)
+	s_btn.add_theme_color_override("font_color", Color(1.0, 0.88, 0.4))
+	s_btn.add_theme_font_size_override("font_size", 11)
+	
+	UIJuiceHelper.attach_button_juice(s_btn, 0.94, 1.05)
+	s_btn.pressed.connect(func():
+		var root = get_tree().current_scene
+		if root and root.has_node("ShelterModal"):
+			root.get_node("ShelterModal").open_shelter()
+	)
+	panel.add_child(s_btn)
 	_setup_class_button(btn_marksman, card_marksman, "marksman")
 	_setup_class_button(btn_brawler, card_brawler, "brawler")
 	_setup_class_button(btn_tank, card_tank, "tank")
@@ -34,8 +71,15 @@ func _ready() -> void:
 func _setup_codex_button() -> void:
 	var c_btn = Button.new()
 	c_btn.text = "📖 SOKAK GÜNCESİ (CODEX)"
-	c_btn.custom_minimum_size = Vector2(240, 32)
-	c_btn.position = Vector2(panel.size.x * 0.5 - 120, panel.size.y - 44)
+	c_btn.custom_minimum_size = Vector2(0, 34)
+	c_btn.anchor_left = 0.5
+	c_btn.anchor_top = 1.0
+	c_btn.anchor_right = 1.0
+	c_btn.anchor_bottom = 1.0
+	c_btn.offset_left = 6
+	c_btn.offset_right = -12
+	c_btn.offset_top = -48
+	c_btn.offset_bottom = -14
 	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.10, 0.14, 0.22, 0.95)
@@ -50,7 +94,7 @@ func _setup_codex_button() -> void:
 	style.corner_radius_bottom_left = 8
 	c_btn.add_theme_stylebox_override("normal", style)
 	c_btn.add_theme_color_override("font_color", Color(0.85, 0.92, 1.0))
-	c_btn.add_theme_font_size_override("font_size", 12)
+	c_btn.add_theme_font_size_override("font_size", 11)
 	
 	UIJuiceHelper.attach_button_juice(c_btn, 0.94, 1.05)
 	c_btn.pressed.connect(func():

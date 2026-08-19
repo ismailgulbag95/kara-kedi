@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://water_tower_prop_01"]
+
+[ext_resource type="Script" path="res://scripts/props/water_tower_prop.gd" id="1_wtower"]
+[ext_resource type="Texture2D" path="res://assets/textures/topdown_rooftop_floor.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_col"]
+radius = 32.0
+
+[node name="WaterTowerProp" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_wtower")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.2, 0.45, 0.75, 1)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_col")

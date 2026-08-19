@@ -29,11 +29,11 @@ func _animate_victory_stats() -> void:
 		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween.tween_method(func(val: float):
 			var ratio = clampf(val, 0.0, 1.0)
-			stats_label.text = """👑 ZAFER KAZANILDI!
-Öldürülen Fare: %d
-Toplanan Koin: %d
-Toplam Puan: %d
-🏆 En Yüksek Skor: %d""" % [
+			stats_label.text = """👑 ŞEHİR ARTIK KARA KEDİNİN!
+Temizlenen Fare Sürüsü: %d
+Kazanılan Zula Sermayesi: %d 🐟
+Toplam Şehir Puanı: %d
+🏆 En Yüksek Şehir Skoru: %d""" % [
 				int(float(target_kills) * ratio),
 				int(float(target_coins) * ratio),
 				int(float(target_score) * ratio),
@@ -41,11 +41,11 @@ Toplam Puan: %d
 			]
 		, 0.0, 1.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	else:
-		stats_label.text = """👑 ZAFER KAZANILDI!
-Öldürülen Fare: %d
-Toplanan Koin: %d
-Toplam Puan: %d
-🏆 En Yüksek Skor: %d""" % [
+		stats_label.text = """👑 ŞEHİR ARTIK KARA KEDİNİN!
+Temizlenen Fare Sürüsü: %d
+Kazanılan Zula Sermayesi: %d 🐟
+Toplam Şehir Puanı: %d
+🏆 En Yüksek Şehir Skoru: %d""" % [
 			target_kills, target_coins, target_score, high_s
 		]
 

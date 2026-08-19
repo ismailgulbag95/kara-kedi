@@ -116,7 +116,8 @@ func _process(delta: float) -> void:
 		camera.rotation = 0.0
 
 func _on_boss_spawned(boss_node: Node2D) -> void:
-	var title = "BÜYÜK FARE KRALI" if boss_node.is_final_boss else "FARE KRALI"
+	var tier = boss_node.get("boss_tier") if "boss_tier" in boss_node else 1
+	var title = "İMPARATOR FARE KRALI (MEGA BOSS)" if tier == 3 else ("BÜYÜK FARE KRALI" if tier == 2 else "FARE KRALI")
 	hud.show_boss_bar(title, boss_node.max_health)
 	boss_node.boss_hp_updated.connect(hud.update_boss_bar)
 	GameManager.request_chromatic_aberration(0.015, 0.3)

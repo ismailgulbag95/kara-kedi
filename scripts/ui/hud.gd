@@ -96,7 +96,7 @@ func _stop_danger_pulse() -> void:
 		fade.tween_property(danger_rect, "color:a", 0.0, 0.3)
 
 func _on_wave_started(wave_num: int) -> void:
-	wave_label.text = "DALGA " + str(wave_num)
+	wave_label.text = "🌃 GECE BASKINI %d / 15" % wave_num
 	boss_container.visible = false
 	timer_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 
@@ -195,8 +195,8 @@ func _setup_rage_ui() -> void:
 	var rage_container = HBoxContainer.new()
 	rage_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	rage_container.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	rage_container.position = Vector2(0, $Control.size.y - 70)
-	rage_container.size = Vector2($Control.size.x, 26)
+	rage_container.offset_top = -65.0
+	rage_container.offset_bottom = -35.0
 	rage_container.add_theme_constant_override("separation", 10)
 	
 	rage_bar = ProgressBar.new()

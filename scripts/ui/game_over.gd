@@ -27,7 +27,7 @@ func _animate_stats_count() -> void:
 	var target_score = GameManager.score
 	
 	var is_new_record = (target_score >= GameManager.high_score and target_score > 0)
-	var record_str = "\n🏆 YENİ EN YÜKSEK SKOR!" if is_new_record else ""
+	var record_str = "\n🏆 TEBRİKLER! YENİ ŞEHİR REKORU!" if is_new_record else ""
 	
 	var tween = create_tween()
 	if tween:
@@ -35,7 +35,7 @@ func _animate_stats_count() -> void:
 		var dummy = 0.0
 		tween.tween_method(func(val: float):
 			var ratio = clampf(val, 0.0, 1.0)
-			stats_label.text = "Ulaşılan Dalga: %d\nÖldürülen Fare: %d\nToplanan Koin: %d\nToplam Puan: %d%s" % [
+			stats_label.text = "Son Gece Baskını: %d / 15\nAvlanan Fare Sürüsü: %d\nToplanan Zula Parası: %d 🐟\nToplam Şehir Puanı: %d%s" % [
 				int(float(target_wave) * ratio),
 				int(float(target_kills) * ratio),
 				int(float(target_coins) * ratio),
@@ -44,7 +44,7 @@ func _animate_stats_count() -> void:
 			]
 		, 0.0, 1.0, 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	else:
-		stats_label.text = "Ulaşılan Dalga: %d\nÖldürülen Fare: %d\nToplanan Koin: %d\nToplam Puan: %d%s" % [
+		stats_label.text = "Son Gece Baskını: %d / 15\nAvlanan Fare Sürüsü: %d\nToplanan Zula Parası: %d 🐟\nToplam Şehir Puanı: %d%s" % [
 			target_wave, target_kills, target_coins, target_score, record_str
 		]
 

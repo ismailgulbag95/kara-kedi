@@ -45,6 +45,45 @@ func _on_wave_started(wave_num: int) -> void:
 	GameManager.is_wave_active = true
 	SoundManager.play_wave_horn()
 	_find_player()
+	_setup_wave_props_and_nests(wave_num)
+
+func spawn_rat_from_nest(nest_pos: Vector2) -> void:
+	if small_rat_scene:
+		var rat = small_rat_scene.instantiate()
+		var offset = Vector2(randf_range(-25.0, 25.0), randf_range(-25.0, 25.0))
+		rat.global_position = nest_pos + offset
+		get_parent().add_child(rat)
+
+func _setup_wave_props_and_nests(wave_num: int) -> void:
+	# Clean existing props
+	for n in get_tree().get_nodes_in_group("enemy_nests"):
+		n.queue_free()
+	for p in get_tree().get_nodes_in_group("interactive_props"):
+		p.queue_free()
+		
+	# Spawn 2 Rat Nests on rooftops
+	var nest_sc = load("res://scenes/props/rat_nest_spawner.tscn")
+	if nest_sc:
+		for i in range(2):
+			var nest = nest_sc.instantiate()
+			nest.global_position = Vector2(randf_range(-450, 450), randf_range(-700, 700))
+			get_parent().add_child(nest)
+			
+	# Spawn 2 Water Towers
+	var wt_sc = load("res://scenes/props/water_tower_prop.tscn")
+	if wt_sc:
+		for i in range(2):
+			var wt = wt_sc.instantiate()
+			wt.global_position = Vector2(randf_range(-400, 400), randf_range(-650, 650))
+			get_parent().add_child(wt)
+			
+	# Spawn Stray Cat Ally companion on wave 3+
+	if wave_num >= 3 and get_tree().get_nodes_in_group("allies").size() == 0:
+		var cat_sc = load("res://scenes/allies/stray_cat_ally.tscn")
+		if cat_sc and target_player:
+			var cat = cat_sc.instantiate()
+			cat.global_position = target_player.global_position + Vector2(50, 50)
+			get_parent().add_child(cat)
 
 func _find_player() -> void:
 	var players = get_tree().get_nodes_in_group("player")

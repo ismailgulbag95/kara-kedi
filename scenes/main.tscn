@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Texture2D" path="res://assets/textures/topdown_rooftop_floor.png" id="2_floor"]
@@ -16,6 +16,8 @@
 [ext_resource type="Shader" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="14_vignette"]
 [ext_resource type="PackedScene" path="res://scenes/ui/level_up_draft.tscn" id="15_ldraft"]
 [ext_resource type="PackedScene" path="res://scenes/ui/codex_modal.tscn" id="16_codex"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shelter_modal.tscn" id="17_shelter"]
+[ext_resource type="Script" path="res://scripts/globals/environment_manager.gd" id="18_env"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("14_vignette")
@@ -47,6 +49,9 @@ stretch_mode = 1
 
 [node name="CityDepthManager" type="Node2D" parent="."]
 script = ExtResource("4_city_depth")
+
+[node name="EnvironmentManager" type="Node2D" parent="."]
+script = ExtResource("18_env")
 
 [node name="RooftopAbyssShadow" type="ColorRect" parent="."]
 offset_left = -745.0
@@ -176,3 +181,6 @@ layer = 30
 
 [node name="CodexModal" parent="." instance=ExtResource("16_codex")]
 layer = 35
+
+[node name="ShelterModal" parent="." instance=ExtResource("17_shelter")]
+layer = 38

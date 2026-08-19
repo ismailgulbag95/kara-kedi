@@ -12,9 +12,23 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="10_gover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="11_vict"]
 [ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="12_menu"]
+[ext_resource type="Shader" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="13_vignette"]
+[ext_resource type="PackedScene" path="res://scenes/ui/level_up_draft.tscn" id="14_ldraft"]
+[ext_resource type="PackedScene" path="res://scenes/ui/codex_modal.tscn" id="15_codex"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
+shader = ExtResource("13_vignette")
+shader_parameter/vignette_intensity = 0.35
+shader_parameter/vignette_radius = 0.88
+shader_parameter/scanline_count = 300.0
+shader_parameter/scanline_intensity = 0.05
+shader_parameter/chromatic_aberration = 0.0
+shader_parameter/rage_intensity = 0.0
+
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_horiz"]
 size = Vector2(1440, 64)
+
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vert"]
 size = Vector2(64, 2100)
@@ -23,6 +37,7 @@ size = Vector2(64, 2100)
 script = ExtResource("1_main")
 
 [node name="Background" type="TextureRect" parent="."]
+modulate = Color(0.64, 0.67, 0.80, 1)
 texture_repeat = 2
 offset_left = -680.0
 offset_top = -1020.0
@@ -32,6 +47,7 @@ texture = ExtResource("2_floor")
 stretch_mode = 1
 
 [node name="WallVisualTop" type="TextureRect" parent="."]
+modulate = Color(0.72, 0.75, 0.88, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
@@ -41,6 +57,7 @@ texture = ExtResource("3_wall")
 stretch_mode = 1
 
 [node name="WallVisualBottom" type="TextureRect" parent="."]
+modulate = Color(0.72, 0.75, 0.88, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = 976.0
@@ -50,6 +67,7 @@ texture = ExtResource("3_wall")
 stretch_mode = 1
 
 [node name="WallVisualLeft" type="TextureRect" parent="."]
+modulate = Color(0.72, 0.75, 0.88, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
@@ -59,6 +77,7 @@ texture = ExtResource("3_wall")
 stretch_mode = 1
 
 [node name="WallVisualRight" type="TextureRect" parent="."]
+modulate = Color(0.72, 0.75, 0.88, 1)
 texture_repeat = 2
 offset_left = 656.0
 offset_top = -1040.0
@@ -66,6 +85,7 @@ offset_right = 720.0
 offset_bottom = 1040.0
 texture = ExtResource("3_wall")
 stretch_mode = 1
+
 
 [node name="ArenaWalls" type="StaticBody2D" parent="."]
 collision_layer = 32
@@ -96,13 +116,29 @@ position_smoothing_speed = 8.0
 [node name="WaveManager" type="Node2D" parent="."]
 script = ExtResource("5_wave")
 
+[node name="VignetteOverlay" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="ColorRect" type="ColorRect" parent="VignetteOverlay"]
+material = SubResource("ShaderMaterial_vignette")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="VirtualJoystick" parent="." instance=ExtResource("7_vjoy")]
+
 
 [node name="HUD" parent="." instance=ExtResource("6_hud")]
 layer = 8
 
 [node name="Shop" parent="." instance=ExtResource("8_shop")]
 layer = 10
+
+[node name="LevelUpDraft" parent="." instance=ExtResource("14_ldraft")]
+layer = 12
 
 [node name="PauseMenu" parent="." instance=ExtResource("9_pause")]
 layer = 15
@@ -115,3 +151,8 @@ layer = 25
 
 [node name="MainMenu" parent="." instance=ExtResource("12_menu")]
 layer = 30
+
+[node name="CodexModal" parent="." instance=ExtResource("15_codex")]
+layer = 35
+
+

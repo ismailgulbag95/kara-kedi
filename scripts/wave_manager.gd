@@ -12,10 +12,12 @@ signal boss_spawned(boss_node: Node2D)
 @export var spitter_rat_scene: PackedScene = preload("res://scenes/enemies/rat_spitter.tscn")
 @export var dasher_rat_scene: PackedScene = preload("res://scenes/enemies/rat_dasher.tscn")
 @export var boss_rat_king_scene: PackedScene = preload("res://scenes/enemies/boss_rat_king.tscn")
+const LOOT_CRATE_SCENE = preload("res://scenes/props/loot_crate.tscn")
 
 var wave_time_left: float = 0.0
 var spawn_timer: float = 0.0
 var spawn_interval: float = 1.0
+var crate_spawn_timer: float = 10.0
 var target_player: Node2D = null
 var is_elite_spawned: bool = false
 var active_boss_node: Node2D = null
@@ -37,6 +39,7 @@ func _on_wave_started(wave_num: int) -> void:
 		
 	spawn_interval = max(0.22, 0.65 - float(wave_num - 1) * 0.03)
 	spawn_timer = 0.3
+	crate_spawn_timer = randf_range(7.0, 12.0)
 	is_elite_spawned = false
 	active_boss_node = null
 	GameManager.is_wave_active = true
@@ -54,6 +57,12 @@ func _process(delta: float) -> void:
 		
 	wave_time_left -= delta
 	time_updated.emit(max(0.0, wave_time_left))
+	
+	# Dinamik Hediye Sandığı Doğuşu
+	crate_spawn_timer -= delta
+	if crate_spawn_timer <= 0.0:
+		_spawn_loot_crate()
+		crate_spawn_timer = randf_range(16.0, 24.0)
 	
 	# Boss Doğuşu (Dalga 5, 10 & 15)
 	if (GameManager.current_wave == 5 or GameManager.current_wave == 10 or GameManager.current_wave == 15) and not is_elite_spawned and wave_time_left <= 35.0:
@@ -76,6 +85,18 @@ func _process(delta: float) -> void:
 	if spawn_timer <= 0.0:
 		_spawn_wave_enemy()
 		spawn_timer = spawn_interval
+
+func _spawn_loot_crate() -> void:
+	var existing_crates = get_tree().get_nodes_in_group("crates")
+	if existing_crates.size() >= 2:
+		return
+	if LOOT_CRATE_SCENE:
+		var crate = LOOT_CRATE_SCENE.instantiate()
+		var rx = randf_range(ARENA_MIN_X + 60.0, ARENA_MAX_X - 60.0)
+		var ry = randf_range(ARENA_MIN_Y + 60.0, ARENA_MAX_Y - 60.0)
+		crate.global_position = Vector2(rx, ry)
+		get_parent().add_child(crate)
+
 
 func _spawn_wave_enemy() -> void:
 	if not is_instance_valid(target_player):

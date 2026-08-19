@@ -1,53 +1,48 @@
-[gd_scene load_steps=6 format=3 uid="uid://main_menu_kara_kedi_v2"]
+[gd_scene load_steps=5 format=3 uid="uid://char_select_kara_kedi_01"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://scripts/ui/character_select.gd" id="1_csel"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_menubg"]
-bg_color = Color(0.06, 0.07, 0.11, 0.98)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.06, 0.10, 0.98)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.95, 0.78, 0.2, 0.95)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.8)
-shadow_size = 18
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.75)
+shadow_size = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
 content_margin_left = 10.0
 content_margin_top = 8.0
 content_margin_right = 10.0
 content_margin_bottom = 8.0
-bg_color = Color(0.09, 0.11, 0.18, 0.96)
+bg_color = Color(0.08, 0.10, 0.16, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.35, 0.45, 0.75, 0.85)
+border_color = Color(0.35, 0.45, 0.7, 0.8)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playbtn"]
-bg_color = Color(0.96, 0.78, 0.18, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.92, 0.45, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.95, 0.75, 0.18, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainMenu" type="CanvasLayer"]
+[node name="CharacterSelect" type="CanvasLayer"]
 process_mode = 3
-layer = 30
-script = ExtResource("1_menu")
+layer = 28
+script = ExtResource("1_csel")
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -64,7 +59,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.02, 0.03, 0.05, 0.85)
+color = Color(0, 0, 0, 0.75)
 
 [node name="Panel" type="Panel" parent="Control"]
 layout_mode = 1
@@ -74,44 +69,44 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -235.0
-offset_top = -370.0
+offset_top = -340.0
 offset_right = 235.0
-offset_bottom = 370.0
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_menubg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="TitleLabel" type="Label" parent="Control/Panel"]
+[node name="HeaderLabel" type="Label" parent="Control/Panel"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -220.0
-offset_top = 14.0
-offset_right = 220.0
-offset_bottom = 44.0
+offset_left = -210.0
+offset_top = 12.0
+offset_right = 210.0
+offset_bottom = 38.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.96, 0.8, 0.2, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 20
-text = "🐾 KARA KEDİ: FARE İSTİLASI 🐾"
+theme_override_font_sizes/font_size = 18
+text = "🐾 KEDİ SINIFINI SEÇ 🐾"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SubTitle" type="Label" parent="Control/Panel"]
+[node name="SubLabel" type="Label" parent="Control/Panel"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -220.0
-offset_top = 44.0
-offset_right = 220.0
-offset_bottom = 62.0
+offset_left = -210.0
+offset_top = 38.0
+offset_right = 210.0
+offset_bottom = 56.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 11
-text = "Kedi Sınıfını Seç ve Savaşa Başla:"
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 10
+text = "Aşağıdan istediğin kedi sınıfını seç ve savaşa başla:"
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Control/Panel"]
@@ -119,10 +114,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 68.0
-offset_right = -12.0
-offset_bottom = -14.0
+offset_left = 10.0
+offset_top = 60.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
@@ -135,7 +130,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 8
 
 [node name="CardStandard" type="PanelContainer" parent="Control/Panel/ScrollContainer/CardsVBox"]
-custom_minimum_size = Vector2(0, 95)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -152,31 +147,31 @@ theme_override_constants/separation = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 14
-text = "🗡️ Kara Kedi (Dengeli)"
+text = "🗡️ Kara Kedi (Dengeli Savaşçı)"
 
 [node name="Weapon" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardStandard/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "Silah: Kara Çelik Kılıç"
+text = "Başlangıç: Kara Çelik Kılıç"
 
 [node name="Buff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardStandard/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
 theme_override_font_sizes/font_size = 10
-text = "+ Tüm temel statlar dengeli"
+text = "+ Tüm temel statlar dengeli ve çok yönlü."
 
 [node name="BtnStandard" type="Button" parent="Control/Panel/ScrollContainer/CardsVBox/CardStandard/HBox"]
-custom_minimum_size = Vector2(75, 42)
+custom_minimum_size = Vector2(80, 44)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_playbtn")
-text = "OYNA"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SEÇ"
 
 [node name="CardMarksman" type="PanelContainer" parent="Control/Panel/ScrollContainer/CardsVBox"]
-custom_minimum_size = Vector2(0, 95)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -199,25 +194,31 @@ text = "🔫 Nişancı Kedi (Kovboy)"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "Silah: Seri Glock"
+text = "Başlangıç: Seri Glock"
 
 [node name="Buff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardMarksman/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
 theme_override_font_sizes/font_size = 10
-text = "+ %25 Hasar & +60px Menzil, -15 Can"
+text = "+ %25 Hasar & +60px Menzil, +%15 Kritik"
+
+[node name="Debuff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardMarksman/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 10
+text = "- 15 Maks Can (85 HP)"
 
 [node name="BtnMarksman" type="Button" parent="Control/Panel/ScrollContainer/CardsVBox/CardMarksman/HBox"]
-custom_minimum_size = Vector2(75, 42)
+custom_minimum_size = Vector2(80, 44)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_playbtn")
-text = "OYNA"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SEÇ"
 
 [node name="CardBrawler" type="PanelContainer" parent="Control/Panel/ScrollContainer/CardsVBox"]
-custom_minimum_size = Vector2(0, 95)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -240,25 +241,31 @@ text = "🥊 Vahşi Pençeci (Boksör)"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "Silah: Jilet Pençeler"
+text = "Başlangıç: Jilet Pençeler"
 
 [node name="Buff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardBrawler/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
 theme_override_font_sizes/font_size = 10
-text = "+ %40 Saldırı Hızı & +25 Hız, -%25 Menzil"
+text = "+ %40 Saldırı Hızı & +25 Hareket Hızı"
+
+[node name="Debuff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardBrawler/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 10
+text = "- %25 Saldırı Menzili"
 
 [node name="BtnBrawler" type="Button" parent="Control/Panel/ScrollContainer/CardsVBox/CardBrawler/HBox"]
-custom_minimum_size = Vector2(75, 42)
+custom_minimum_size = Vector2(80, 44)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_playbtn")
-text = "OYNA"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SEÇ"
 
 [node name="CardTank" type="PanelContainer" parent="Control/Panel/ScrollContainer/CardsVBox"]
-custom_minimum_size = Vector2(0, 95)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -275,31 +282,37 @@ theme_override_constants/separation = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 14
-text = "🛡️ Zırhlı Şövalye (Tank)"
+text = "🛡️ Zırhlı Şövalye (Kaya Tank)"
 
 [node name="Weapon" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardTank/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "Silah: Kara Çelik Kılıç"
+text = "Başlangıç: Kara Çelik Kılıç"
 
 [node name="Buff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardTank/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
 theme_override_font_sizes/font_size = 10
-text = "+ 35 Can, +4 Zırh, +8 Diken, -%15 Hız"
+text = "+ 35 Can (135 HP), +4 Zırh, +8 Diken"
+
+[node name="Debuff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardTank/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 10
+text = "- %15 Hareket Hızı (185)"
 
 [node name="BtnTank" type="Button" parent="Control/Panel/ScrollContainer/CardsVBox/CardTank/HBox"]
-custom_minimum_size = Vector2(75, 42)
+custom_minimum_size = Vector2(80, 44)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_playbtn")
-text = "OYNA"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SEÇ"
 
 [node name="CardPirate" type="PanelContainer" parent="Control/Panel/ScrollContainer/CardsVBox"]
-custom_minimum_size = Vector2(0, 95)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -316,25 +329,31 @@ theme_override_constants/separation = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 14
-text = "🏴‍☠️ Korsan Kedi (Hazine)"
+text = "🏴‍☠️ Korsan Kedi (Hazine Avcısı)"
 
 [node name="Weapon" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardPirate/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "Silah: Kılçık Bumerang"
+text = "Başlangıç: Kılçık Bumerang"
 
 [node name="Buff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardPirate/HBox/InfoVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
 theme_override_font_sizes/font_size = 10
-text = "+ %50 Koin, +%20 Kritik, -%15 Hasar"
+text = "+ %50 Fazla Koin, +%20 Kritik Şansı"
+
+[node name="Debuff" type="Label" parent="Control/Panel/ScrollContainer/CardsVBox/CardPirate/HBox/InfoVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 10
+text = "- %15 Taban Hasar"
 
 [node name="BtnPirate" type="Button" parent="Control/Panel/ScrollContainer/CardsVBox/CardPirate/HBox"]
-custom_minimum_size = Vector2(75, 42)
+custom_minimum_size = Vector2(80, 44)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_playbtn")
-text = "OYNA"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SEÇ"

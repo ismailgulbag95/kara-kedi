@@ -202,37 +202,94 @@ const ITEMS_DATABASE = [
 		"cost": 7,
 		"effects": {"magnet_radius": 60.0, "move_speed": 10.0}
 	},
+	# --- STRATEJİK RİSK / ÖDÜL (TRADE-OFF) BUILD ---
 	{
 		"category": "item",
-		"id": "piggy_bank",
-		"title": "🐷 Tutumlu Kumbara",
-		"desc": "Dalga sonu kalan her 10 Koin için\n+1 Ekstra Koin faiz verir",
-		"icon_path": "res://assets/textures/items/item_piggy_bank.png",
-		"cost": 7,
-		"effects": {"piggy_bank": 1.0}
+		"id": "glass_dagger",
+		"title": "🗡️ Cam Hançer",
+		"desc": "+%35 Genel Hasar Artışı\n-15 Maksimum Can",
+		"icon_path": "res://assets/textures/items/item_bloody_claw.png",
+		"cost": 12,
+		"effects": {"damage_multiplier": 0.35, "max_hp": -15.0}
 	},
 	{
 		"category": "item",
-		"id": "rat_steak",
-		"title": "🥩 Taze Fare Bifteği",
-		"desc": "+25 Maks Can\nKarakteri anında tamamen iyileştirir",
-		"icon_path": "res://assets/textures/items/item_rat_steak.png",
-		"cost": 8,
-		"effects": {"max_hp": 25.0, "heal_full": 1.0}
+		"id": "knight_armor",
+		"title": "🛡️ Ağır Şövalye Zırhı",
+		"desc": "+6 Zırh Koruması\n-25 Hareket Hızı",
+		"icon_path": "res://assets/textures/items/item_cat_armor.png",
+		"cost": 12,
+		"effects": {"armor": 6.0, "move_speed": -25.0}
+	},
+	{
+		"category": "item",
+		"id": "pirate_scope",
+		"title": "🔭 Korsan Dürbünü",
+		"desc": "+55px Saldırı Menzili\n-%10 Saldırı Hızı",
+		"icon_path": "res://assets/textures/items/item_sniper_glass.png",
+		"cost": 10,
+		"effects": {"attack_range": 55.0, "attack_speed": -0.10}
+	},
+	{
+		"category": "item",
+		"id": "catnip_potion",
+		"title": "🧪 Çılgın Kediotu İksiri",
+		"desc": "+%30 Saldırı Hızı\n-4 Temel Hasar",
+		"icon_path": "res://assets/textures/items/item_rage_mint.png",
+		"cost": 11,
+		"effects": {"attack_speed": 0.30, "damage": -4.0}
+	},
+	{
+		"category": "item",
+		"id": "spiked_collar",
+		"title": "⛓️ Dikenli Çelik Tasma",
+		"desc": "+12 Yansıtılan Diken Hasarı\n-8 Maksimum Can",
+		"icon_path": "res://assets/textures/items/item_thorns.png",
+		"cost": 10,
+		"effects": {"thorns_damage": 12.0, "max_hp": -8.0}
+	},
+	{
+		"category": "item",
+		"id": "greedy_amulet",
+		"title": "🪙 Açgözlü Korsan Tılsımı",
+		"desc": "+%50 Fazla Koin Kazancı\n-2 Zırh Zayıflığı",
+		"icon_path": "res://assets/textures/items/item_gold_magnet.png",
+		"cost": 13,
+		"effects": {"armor": -2.0}
+	},
+	{
+		"category": "item",
+		"id": "ninja_tabi",
+		"title": "🥷 Ninja Kedisi Patikleri",
+		"desc": "+35 Hareket Hızı, +%12 Kritik\n-10 Maksimum Can",
+		"icon_path": "res://assets/textures/items/item_puma_boots.png",
+		"cost": 11,
+		"effects": {"move_speed": 35.0, "crit_chance": 0.12, "max_hp": -10.0}
+	},
+	{
+		"category": "item",
+		"id": "berserk_ring",
+		"title": "💍 Berserker Yüzüğü",
+		"desc": "+%25 Hasar, +%15 Saldırı Hızı\n-3 Zırh",
+		"icon_path": "res://assets/textures/items/item_lightning_whiskers.png",
+		"cost": 14,
+		"effects": {"damage_multiplier": 0.25, "attack_speed": 0.15, "armor": -3.0}
 	}
 ]
+
 
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	GameManager.wave_completed.connect(_on_wave_completed)
 	GameManager.coins_changed.connect(_update_coins_ui)
 	GameManager.weapons_updated.connect(_update_weapon_slots_ui)
 	
 	reroll_btn.pressed.connect(_on_reroll_pressed)
 	next_wave_btn.pressed.connect(_on_next_wave_pressed)
+	UIJuiceHelper.attach_button_juice(reroll_btn)
+	UIJuiceHelper.attach_button_juice(next_wave_btn)
 
-func _on_wave_completed(wave_num: int) -> void:
+func open_shop() -> void:
 	visible = true
 	get_tree().paused = true
 	reroll_count = 0
@@ -240,6 +297,10 @@ func _on_wave_completed(wave_num: int) -> void:
 	_update_coins_ui(GameManager.coins)
 	_update_weapon_slots_ui()
 	_populate_market_cards()
+
+func _on_wave_completed(_wave_num: int) -> void:
+	open_shop()
+
 
 func _calculate_reroll_cost() -> void:
 	reroll_cost = 3 + (reroll_count * 2) + (GameManager.current_wave - 1) * 2
@@ -258,10 +319,10 @@ func _update_weapon_slots_ui() -> void:
 	for i in range(3):
 		var w = GameManager.equipped_weapons[i]
 		var panel = PanelContainer.new()
-		panel.custom_minimum_size = Vector2(190, 75)
+		panel.custom_minimum_size = Vector2(190, 85)
 		
 		var vbox = VBoxContainer.new()
-		vbox.add_theme_constant_override("separation", 3)
+		vbox.add_theme_constant_override("separation", 2)
 		
 		var lbl = Label.new()
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -270,8 +331,13 @@ func _update_weapon_slots_ui() -> void:
 		if w != null:
 			var tier_num = w.get("tier", 1)
 			var tier_col = GameManager.TIER_COLORS.get(tier_num, Color.WHITE)
+			var w_id = w.get("id", "")
+			var tag_str = ""
+			if GameManager.WEAPON_TAGS.has(w_id):
+				var tag_key = GameManager.WEAPON_TAGS[w_id]
+				tag_str = " (" + GameManager.TAG_NAMES.get(tag_key, "") + ")"
 			
-			lbl.text = "%s:\n%s [T%d]" % [slot_names[i], w.get("name", "Silah"), tier_num]
+			lbl.text = "%s:\n%s [T%d]%s" % [slot_names[i], w.get("name", "Silah"), tier_num, tag_str]
 			lbl.add_theme_color_override("font_color", tier_col)
 			vbox.add_child(lbl)
 			
@@ -280,12 +346,14 @@ func _update_weapon_slots_ui() -> void:
 			btns_hbox.add_theme_constant_override("separation", 6)
 			
 			var sell_btn = Button.new()
-			var refund = int(w.get("cost", 8) * tier_num * 0.6)
-			sell_btn.text = "Sat (+%d)" % refund
+			var base_c = w.get("cost", 8)
+			var refund = max(4, int(base_c * pow(1.8, tier_num - 1) * 0.6))
+			sell_btn.text = "♻️ Sat (+%d)" % refund
 			sell_btn.add_theme_font_size_override("font_size", 10)
+			sell_btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+			UIJuiceHelper.attach_button_juice(sell_btn, 0.92, 1.05)
 			sell_btn.pressed.connect(func():
 				GameManager.sell_weapon(i)
-				SoundManager.play_coin()
 				_update_weapon_slots_ui()
 				_render_cards()
 			)
@@ -298,6 +366,7 @@ func _update_weapon_slots_ui() -> void:
 				combine_btn.text = "⚡ BİRLEŞTİR"
 				combine_btn.add_theme_font_size_override("font_size", 10)
 				combine_btn.add_theme_color_override("font_color", next_tier_col)
+				UIJuiceHelper.attach_button_juice(combine_btn, 0.92, 1.05)
 				combine_btn.pressed.connect(func():
 					if GameManager.combine_weapons(i, match_slot):
 						SoundManager.play_upgrade()
@@ -314,6 +383,7 @@ func _update_weapon_slots_ui() -> void:
 			
 		panel.add_child(vbox)
 		slots_container.add_child(panel)
+
 
 func _populate_market_cards() -> void:
 	var new_offers: Array = []
@@ -389,9 +459,20 @@ func _animate_card_purchase(card: Control, callback: Callable) -> void:
 	SoundManager.play_upgrade()
 	tween.tween_callback(callback)
 
-func _create_card_ui(card_data: Dictionary, _index: int) -> void:
+func _create_card_ui(card_data: Dictionary, index: int) -> void:
 	var panel = PanelContainer.new()
 	panel.custom_minimum_size = Vector2(300, 320)
+	panel.pivot_offset = Vector2(150, 160)
+	panel.scale = Vector2(0.85, 0.85)
+	panel.modulate.a = 0.0
+	
+	var tween = panel.create_tween()
+	if tween:
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_interval(float(index) * 0.05)
+		tween.tween_property(panel, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(panel, "modulate:a", 1.0, 0.15)
+
 	
 	var is_locked = card_data.get("is_locked", false)
 	var card_tier = card_data.get("tier", 1)
@@ -504,6 +585,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 				)
 			)
 			vbox.add_child(combine_buy_btn)
+			UIJuiceHelper.attach_button_juice(combine_buy_btn, 0.94, 1.04)
 			
 		# 2. Durum: Boş yuva varsa normal "AL"
 		if empty_slot != -1:
@@ -528,6 +610,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 				)
 			)
 			vbox.add_child(buy_btn)
+			UIJuiceHelper.attach_button_juice(buy_btn, 0.94, 1.04)
 		elif existing_slot == -1:
 			var full_btn = Button.new()
 			full_btn.custom_minimum_size = Vector2(0, 44)
@@ -551,6 +634,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 			)
 		)
 		vbox.add_child(buy_btn)
+		UIJuiceHelper.attach_button_juice(buy_btn, 0.94, 1.04)
 	
 	# 5. Özel Pixel Art Kilit Butonu (lock_closed.png / lock_open.png)
 	var lock_btn = Button.new()
@@ -569,9 +653,12 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 		_render_cards()
 	)
 	vbox.add_child(lock_btn)
+	UIJuiceHelper.attach_button_juice(lock_btn, 0.94, 1.04)
+
 	
 	margin.add_child(vbox)
 	panel.add_child(margin)
+	UIJuiceHelper.attach_card_tilt(panel, card_tier >= 3)
 	cards_container.add_child(panel)
 
 func _on_reroll_pressed() -> void:

@@ -101,9 +101,9 @@ func _perform_slam_shockwave() -> void:
 		if is_instance_valid(root_scene):
 			root_scene.add_child(shock)
 			
-	var root_scene2 = get_tree().current_scene
-	if is_instance_valid(root_scene2) and root_scene2.has_method("add_screen_shake"):
-		root_scene2.add_screen_shake(10.0)
+	GameManager.request_screen_shake(0.75)
+	GameManager.hitstop(0.06, 0.05)
+
 
 func _perform_minion_roar() -> void:
 	SoundManager.play_boss_roar()

@@ -23,12 +23,49 @@ var wobble_time: float = 0.0
 const COIN_SCENE = preload("res://scenes/coin.tscn")
 const DEATH_PARTICLES_SCENE = preload("res://scenes/vfx/death_particles.tscn")
 const FLOATING_TEXT_SCENE = preload("res://scenes/vfx/floating_text.tscn")
+const PALETTE_SHADER = preload("res://assets/shaders/palette_swap.gdshader")
+
+
+var flash_material: ShaderMaterial
 
 func _ready() -> void:
 	add_to_group("enemies")
 	current_health = max_health
 	wobble_time = randf() * 10.0
+	
+	flash_material = ShaderMaterial.new()
+	flash_material.shader = PALETTE_SHADER
+	flash_material.set_shader_parameter("shadow_tint", Color(0.09, 0.08, 0.18, 1.0))
+	flash_material.set_shader_parameter("highlight_tint", Color(1.0, 0.85, 0.5, 1.0))
+	flash_material.set_shader_parameter("grading_strength", 0.18)
+	flash_material.set_shader_parameter("flash_color", Color(1.0, 1.0, 1.0, 1.0))
+	sprite.material = flash_material
+	_create_ground_shadow()
 	_find_player()
+
+func _create_ground_shadow() -> void:
+	var shadow = Polygon2D.new()
+	var points = PackedVector2Array()
+	var rad_x = 11.0
+	var rad_y = 5.5
+	if max_health > 250.0:
+		rad_x = 34.0
+		rad_y = 16.0
+	elif max_health > 60.0:
+		rad_x = 18.0
+		rad_y = 9.0
+		
+	for i in range(12):
+		var angle = float(i) * TAU / 12.0
+		points.append(Vector2(cos(angle) * rad_x, sin(angle) * rad_y))
+	shadow.polygon = points
+	shadow.color = Color(0.03, 0.03, 0.07, 0.38)
+	shadow.position = Vector2(0, rad_y + 4.0)
+	shadow.z_index = -1
+	add_child(shadow)
+	move_child(shadow, 0)
+
+
 
 func _find_player() -> void:
 	var players = get_tree().get_nodes_in_group("player")
@@ -79,24 +116,50 @@ func take_damage(amount: float, knockback_dir: Vector2, knock_force: float, is_c
 	current_health -= amount
 	knockback_velocity = knockback_dir * knock_force
 	
-	# Kritik Hasar Metni (Floating Text)
+	# Dinamik Kademeli Hasar Metinleri (Floating Combat Text)
 	if is_crit:
-		_spawn_floating_text("CRIT! " + str(int(amount)), Color(1.0, 0.85, 0.2), 16)
+		_spawn_floating_text("⚡" + str(int(amount)), Color(1.0, 0.82, 0.15), 17, true)
+		GameManager.request_screen_shake(0.22)
+		GameManager.request_chromatic_aberration(0.008, 0.12)
+		GameManager.hitstop(0.045, 0.05)
+	else:
+		_spawn_floating_text(str(int(amount)), Color(1.0, 0.95, 0.88), 13, false)
+		if randf() < 0.15:
+			GameManager.request_screen_shake(0.06)
 	
-	var tween = create_tween()
-	sprite.modulate = Color(3.0, 1.0, 1.0, 1.0)
-	tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
+	GameManager.add_feline_rage(amount * 0.12)
+	
+	# Beyaz Parlama Efekti (Shader Hit Flash)
+	_play_hit_flash()
+	
+	# Darbe Ezilmesi (Squash & Stretch)
+	if is_instance_valid(sprite):
+		sprite.scale = Vector2(1.35, 0.7)
+		var squash_tw = create_tween()
+		if squash_tw:
+			squash_tw.tween_property(sprite, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	
 	if current_health <= 0.0:
 		_die()
 
-func _spawn_floating_text(txt: String, col: Color, size: int) -> void:
+func _play_hit_flash() -> void:
+	if not is_instance_valid(flash_material):
+		return
+	flash_material.set_shader_parameter("flash_modifier", 1.0)
+	var tween = create_tween()
+	tween.tween_method(func(v: float):
+		if is_instance_valid(flash_material):
+			flash_material.set_shader_parameter("flash_modifier", v),
+		1.0, 0.0, 0.12
+	).set_trans(Tween.TRANS_QUAD)
+
+func _spawn_floating_text(txt: String, col: Color, size: int, is_crit_flag: bool = false) -> void:
 	var ftext = FLOATING_TEXT_SCENE.instantiate()
 	ftext.global_position = global_position + Vector2(0, -16)
 	var root_scene = get_tree().current_scene
 	if is_instance_valid(root_scene):
 		root_scene.call_deferred("add_child", ftext)
-		ftext.call_deferred("setup", txt, col, size)
+		ftext.call_deferred("setup", txt, col, size, is_crit_flag)
 
 func _die() -> void:
 	if is_dead:
@@ -109,6 +172,15 @@ func _die() -> void:
 		
 	GameManager.enemies_killed += 1
 	GameManager.score += score_value
+	GameManager.add_feline_rage(3.5)
+	
+	# Düşman ölüm sarsıntısı & mikro hitstop
+	if has_node("BossHpBar") or get("is_boss") if has_method("get") else false:
+		GameManager.request_screen_shake(0.65)
+		GameManager.hitstop(0.08, 0.04)
+	elif randf() < 0.25:
+		GameManager.request_screen_shake(0.12)
+
 	
 	# Ölüm Partikülleri (Death Sparks)
 	var particles = DEATH_PARTICLES_SCENE.instantiate()

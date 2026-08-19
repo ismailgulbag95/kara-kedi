@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://milk_heal_item_01"]
+
+[ext_resource type="Script" path="res://scripts/props/milk_heal_item.gd" id="1_milk"]
+[ext_resource type="Texture2D" path="res://assets/textures/milk_bowl.png" id="2_mtex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_milk"]
+radius = 14.0
+
+[node name="MilkHealItem" type="Area2D" groups=["collectibles"]]
+collision_layer = 16
+collision_mask = 3
+script = ExtResource("1_milk")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_mtex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_milk")

@@ -25,7 +25,7 @@ var current_dir_name: String = "south"
 var anim_frame_idx: int = 0
 var anim_timer: float = 0.0
 const FRAME_DURATION: float = 0.085
-const PLAYER_BASE_SCALE: float = 1.6 # Tam 1.6x dengeli boyut
+const PLAYER_BASE_SCALE: float = 2.0 # Tam 2x integer piksel uyumu
 
 const WEAPON_SCENES = {
 	"sword": preload("res://scenes/weapons/weapon_sword.tscn"),
@@ -37,15 +37,69 @@ const WEAPON_SCENES = {
 	"bow": preload("res://scenes/weapons/weapon_bow.tscn")
 }
 
+const PAW_PRINT_SCENE = preload("res://scenes/vfx/paw_print.tscn")
+var paw_dist_accum: float = 0.0
+var paw_side: int = 1
+
+const PALETTE_SHADER = preload("res://assets/shaders/palette_swap.gdshader")
+var actor_material: ShaderMaterial
+
 func _ready() -> void:
 	add_to_group("player")
 	GameManager.weapons_updated.connect(_update_equipped_weapons)
 	magnet_area.area_entered.connect(_on_magnet_area_entered)
 	hurtbox_area.area_entered.connect(_on_hurtbox_area_entered)
 	
+	actor_material = ShaderMaterial.new()
+	actor_material.shader = PALETTE_SHADER
+	actor_material.set_shader_parameter("shadow_tint", Color(0.12, 0.08, 0.22, 1.0))
+	actor_material.set_shader_parameter("highlight_tint", Color(1.0, 0.88, 0.4, 1.0))
+	actor_material.set_shader_parameter("grading_strength", 0.25)
+	actor_material.set_shader_parameter("flash_color", Color(1.0, 0.25, 0.25, 1.0))
+	sprite.material = actor_material
+	
 	_load_all_sprites()
 	_update_equipped_weapons()
 	_update_magnet_radius()
+	_create_ground_shadow()
+	_setup_feline_eye_light()
+
+func _create_ground_shadow() -> void:
+	var shadow = Polygon2D.new()
+	var points = PackedVector2Array()
+	var rad_x = 16.0
+	var rad_y = 8.0
+	for i in range(12):
+		var angle = float(i) * TAU / 12.0
+		points.append(Vector2(cos(angle) * rad_x, sin(angle) * rad_y))
+	shadow.polygon = points
+	shadow.color = Color(0.02, 0.02, 0.06, 0.42)
+	shadow.position = Vector2(0, rad_y + 10.0)
+	shadow.z_index = -1
+	add_child(shadow)
+	move_child(shadow, 0)
+
+func _setup_feline_eye_light() -> void:
+	var light_grad = Gradient.new()
+	light_grad.colors = PackedColorArray([Color(1.0, 0.95, 0.6, 1.0), Color(1.0, 0.95, 0.6, 0.0)])
+	light_grad.offsets = PackedFloat32Array([0.0, 1.0])
+	var light_tex = GradientTexture2D.new()
+	light_tex.gradient = light_grad
+	light_tex.fill = GradientTexture2D.FILL_RADIAL
+	light_tex.fill_from = Vector2(0.5, 0.5)
+	light_tex.fill_to = Vector2(0.5, 0.0)
+	light_tex.width = 256
+	light_tex.height = 256
+	
+	var eye_light = PointLight2D.new()
+	eye_light.texture = light_tex
+	eye_light.texture_scale = 1.8
+	eye_light.color = Color(1.0, 0.92, 0.55, 0.85)
+	eye_light.energy = 0.95
+	add_child(eye_light)
+
+
+
 
 func _load_all_sprites() -> void:
 	var rot_path = "res://assets/textures/player_character/rotations/"
@@ -112,6 +166,10 @@ func _physics_process(delta: float) -> void:
 	if input_dir.length() > 0.1:
 		velocity = input_dir * GameManager.move_speed
 		_process_movement_animation(input_dir, delta)
+		paw_dist_accum += velocity.length() * delta
+		if paw_dist_accum >= 24.0:
+			paw_dist_accum = 0.0
+			_spawn_paw_print(input_dir)
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, GameManager.move_speed * 6.0 * delta)
 		_process_idle_animation()
@@ -195,9 +253,19 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_for
 	GameManager.damage_player(amount)
 	SoundManager.play_damage()
 	
-	var tween = create_tween()
-	sprite.modulate = Color(2.5, 0.5, 0.5, 1.0)
-	tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
+	GameManager.hitstop(0.06, 0.04)
+	GameManager.request_screen_shake(0.42)
+	
+	if is_instance_valid(actor_material):
+		actor_material.set_shader_parameter("flash_modifier", 1.0)
+		var tween = create_tween()
+		tween.tween_method(func(v: float):
+			if is_instance_valid(actor_material):
+				actor_material.set_shader_parameter("flash_modifier", v),
+			1.0, 0.0, 0.22
+		).set_trans(Tween.TRANS_QUAD)
+
+
 
 func _on_hurtbox_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemy_hitbox") or area.is_in_group("enemy_hurtbox"):
@@ -212,3 +280,19 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 func _on_magnet_area_entered(area: Area2D) -> void:
 	if area.is_in_group("collectibles") and area.has_method("start_attraction"):
 		area.start_attraction(self)
+
+func _spawn_paw_print(dir: Vector2) -> void:
+	if not PAW_PRINT_SCENE or not get_parent():
+		return
+	var p = PAW_PRINT_SCENE.instantiate()
+	p.global_position = global_position + Vector2(0, 8)
+	p.rotation = dir.angle() + PI / 2.0
+	p.side = paw_side
+	paw_side = -paw_side
+	get_parent().add_child(p)
+	get_parent().move_child(p, 1)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
+		if GameManager.feline_rage >= GameManager.max_feline_rage and not GameManager.is_feline_rage_active:
+			GameManager.activate_feline_rage()

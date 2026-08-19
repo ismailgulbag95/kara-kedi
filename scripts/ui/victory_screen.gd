@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 ## Zafer Ekranı (Victory Screen)
-## Dalga 10 Final Boss'u yenildiğinde açılır.
+## Dalga 10 Final Boss'u yenildiğinde açılır. Dinamik Rakam Sayma Animasyonu (Number Ticking).
 
 @onready var stats_label: Label = $Control/Panel/StatsLabel
 @onready var retry_btn: Button = $Control/Panel/RetryButton
@@ -11,20 +11,43 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	GameManager.victory_triggered.connect(_on_victory)
 	retry_btn.pressed.connect(_on_retry_pressed)
+	UIJuiceHelper.attach_button_juice(retry_btn)
 
 func _on_victory() -> void:
 	visible = true
 	get_tree().paused = true
+	_animate_victory_stats()
+
+func _animate_victory_stats() -> void:
+	var target_kills = GameManager.enemies_killed
+	var target_coins = GameManager.total_coins_collected
+	var target_score = GameManager.score
+	var high_s = GameManager.high_score
 	
-	stats_label.text = """Öldürülen Fare: %d
+	var tween = create_tween()
+	if tween:
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_method(func(val: float):
+			var ratio = clampf(val, 0.0, 1.0)
+			stats_label.text = """👑 ZAFER KAZANILDI!
+Öldürülen Fare: %d
 Toplanan Koin: %d
 Toplam Puan: %d
 🏆 En Yüksek Skor: %d""" % [
-		GameManager.enemies_killed,
-		GameManager.total_coins_collected,
-		GameManager.score,
-		GameManager.high_score
-	]
+				int(float(target_kills) * ratio),
+				int(float(target_coins) * ratio),
+				int(float(target_score) * ratio),
+				high_s
+			]
+		, 0.0, 1.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	else:
+		stats_label.text = """👑 ZAFER KAZANILDI!
+Öldürülen Fare: %d
+Toplanan Koin: %d
+Toplam Puan: %d
+🏆 En Yüksek Skor: %d""" % [
+			target_kills, target_coins, target_score, high_s
+		]
 
 func _on_retry_pressed() -> void:
 	visible = false

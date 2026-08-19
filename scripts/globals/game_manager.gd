@@ -11,6 +11,17 @@ signal game_over_triggered
 signal victory_triggered
 signal player_stat_updated(stat_name: String, value: float)
 signal weapons_updated
+signal screen_shake_requested(trauma_amount: float)
+signal death_defiance_triggered(remaining_lives: int)
+signal chromatic_aberration_requested(strength: float, duration: float)
+signal feline_rage_changed(current_rage: float, max_rage: float)
+signal feline_rage_state_changed(is_active: bool)
+
+var lives_remaining: int = 1
+var feline_rage: float = 0.0
+var max_feline_rage: float = 100.0
+var is_feline_rage_active: bool = false
+
 
 # Karakter Temel ve Güncel Statları
 var max_hp: float = 100.0
@@ -89,8 +100,67 @@ func _process(delta: float) -> void:
 		heal_player(hp_regen * delta)
 
 var selected_character: String = "standard"
+var coin_multiplier: float = 1.0
+
+# Silah Sınıf Sinerjileri (Blade, Gun, Heavy)
+const WEAPON_TAGS = {
+	"sword": "blade",
+	"claws": "blade",
+	"glock": "gun",
+	"magnum": "gun",
+	"bow": "gun",
+	"fish_boomerang": "heavy",
+	"yarn_bomb": "heavy"
+}
+
+const TAG_NAMES = {
+	"blade": "⚔️ Kesici",
+	"gun": "🎯 Menzilli",
+	"heavy": "🛡️ İlkel / Ağır"
+}
+
+var active_synergies: Dictionary = {}
+signal synergies_updated(active_tags: Dictionary)
+
+# Dalga Sonu Seviye Atlama Stat Seçenekleri (Draft Options)
+const DRAFT_STAT_OPTIONS = [
+	{"id": "max_hp", "title": "Dokuz Can", "stat": "max_hp", "delta": 15.0, "desc": "+15 Maksimum Can & İyileşme", "icon": "❤️"},
+	{"id": "dmg", "title": "Keskin Pençe", "stat": "damage_multiplier", "delta": 0.12, "desc": "+%12 Genel Hasar Artışı", "icon": "⚡"},
+	{"id": "atk_spd", "title": "Kediotu Hızı", "stat": "attack_speed", "delta": 0.15, "desc": "+%15 Saldırı Hızı", "icon": "🌪️"},
+	{"id": "armor", "title": "Kalın Kürk", "stat": "armor", "delta": 2.0, "desc": "+2 Zırh (Hasar Azaltma)", "icon": "🛡️"},
+	{"id": "spd", "title": "Çevik Pati", "stat": "move_speed", "delta": 22.0, "desc": "+22 Hareket Hızı", "icon": "🐾"},
+	{"id": "crit", "title": "Avcı Gözü", "stat": "crit_chance", "delta": 0.08, "desc": "+%8 Kritik Vuruş Şansı", "icon": "🎯"},
+	{"id": "regen", "title": "Mırıldanma", "stat": "hp_regen", "delta": 1.2, "desc": "+1.2 Saniye Başı Can Yenilenmesi", "icon": "🌿"},
+	{"id": "thorns", "title": "Dikenli Zırh", "stat": "thorns_damage", "delta": 6.0, "desc": "+6 Hasar Yansıtma (Thorns)", "icon": "🌵"}
+]
+
+func apply_character_archetype(char_id: String) -> void:
+	selected_character = char_id
+	var c = CharacterData.get_character(char_id)
+	max_hp = c.get("max_hp", 100.0)
+	current_hp = max_hp
+	move_speed = c.get("move_speed", 220.0)
+	damage_multiplier = c.get("dmg_mult", 1.0)
+	attack_speed = c.get("attack_speed", 1.0)
+	crit_chance = c.get("crit_chance", 0.05)
+	armor = c.get("armor", 0.0)
+	thorns_damage = c.get("thorns", 0.0)
+	attack_range = 80.0 + c.get("range_bonus", 0.0)
+	coin_multiplier = c.get("coin_mult", 1.0)
+	
+	var sw_id = c.get("start_weapon", "sword")
+	var sw_name = c.get("start_weapon_name", "Kara Çelik Kılıç")
+	equipped_weapons = [
+		{"id": sw_id, "name": sw_name, "tier": 1, "type": "weapon", "cost": 10},
+		null,
+		null
+	]
+	weapons_updated.emit()
+	health_changed.emit(current_hp, max_hp)
+	_recalculate_weapon_synergies()
 
 func reset_game() -> void:
+	Engine.time_scale = 1.0
 	max_hp = 100.0
 	current_hp = max_hp
 	move_speed = 220.0
@@ -102,16 +172,16 @@ func reset_game() -> void:
 	armor = 0.0
 	crit_chance = 0.05
 	crit_multiplier = 2.0
+	coin_multiplier = 1.0
 	
 	hp_regen = 0.0
 	thorns_damage = 0.0
 	piggy_bank_count = 0
+	lives_remaining = 1
+	feline_rage = 0.0
+	is_feline_rage_active = false
 	
-	equipped_weapons = [
-		{"id": "sword", "name": "Kara Çelik Kılıç", "tier": 1, "type": "weapon", "cost": 10},
-		null,
-		null
-	]
+	apply_character_archetype(selected_character)
 	locked_shop_cards.clear()
 	
 	coins = 0
@@ -121,7 +191,54 @@ func reset_game() -> void:
 	current_wave = 1
 	is_wave_active = false
 	is_game_over = false
-	weapons_updated.emit()
+
+func _recalculate_weapon_synergies() -> void:
+	var tag_counts = {"blade": 0, "gun": 0, "heavy": 0}
+	for w in equipped_weapons:
+		if w != null and w is Dictionary:
+			var w_id = w.get("id", "")
+			if WEAPON_TAGS.has(w_id):
+				var t = WEAPON_TAGS[w_id]
+				tag_counts[t] = tag_counts.get(t, 0) + 1
+				
+	active_synergies.clear()
+	for t in tag_counts:
+		if tag_counts[t] >= 2:
+			active_synergies[t] = tag_counts[t]
+			
+	synergies_updated.emit(active_synergies)
+
+func get_synergy_bonus(stat_name: String) -> float:
+	var bonus = 0.0
+	if active_synergies.has("blade"):
+		var count = active_synergies["blade"]
+		if stat_name == "attack_speed":
+			bonus += 0.18 if count == 2 else 0.35
+	if active_synergies.has("gun"):
+		var count = active_synergies["gun"]
+		if stat_name == "damage_multiplier":
+			bonus += 0.20 if count == 2 else 0.40
+		elif stat_name == "attack_range":
+			bonus += 30.0 if count == 2 else 60.0
+	if active_synergies.has("heavy"):
+		var count = active_synergies["heavy"]
+		if stat_name == "armor":
+			bonus += 3.0 if count == 2 else 6.0
+	return bonus
+
+func get_effective_damage_multiplier() -> float:
+	return max(0.1, damage_multiplier + get_synergy_bonus("damage_multiplier"))
+
+func get_effective_attack_speed() -> float:
+	return max(0.2, attack_speed + get_synergy_bonus("attack_speed"))
+
+func get_effective_attack_range() -> float:
+	return max(20.0, attack_range + get_synergy_bonus("attack_range"))
+
+func get_effective_armor() -> float:
+	return armor + get_synergy_bonus("armor")
+
+
 
 var partial_coins: float = 0.0
 
@@ -129,7 +246,7 @@ func add_coins(amount: int) -> void:
 	add_coins_value(float(amount))
 
 func add_coins_value(amount: float) -> void:
-	partial_coins += amount
+	partial_coins += (amount * coin_multiplier)
 	var int_gain = int(partial_coins)
 	if int_gain > 0:
 		partial_coins -= float(int_gain)
@@ -163,7 +280,44 @@ func damage_player(amount: float) -> void:
 		_trigger_thorns_damage()
 	
 	if current_hp <= 0.0:
-		trigger_game_over()
+		if lives_remaining > 0:
+			lives_remaining -= 1
+			current_hp = max_hp * 0.5
+			health_changed.emit(current_hp, max_hp)
+			death_defiance_triggered.emit(lives_remaining)
+			_execute_death_defiance()
+		else:
+			trigger_game_over()
+
+func _execute_death_defiance() -> void:
+	# 1. Dramatik Slow-Motion
+	Engine.time_scale = 0.15
+	var reset_timer = get_tree().create_timer(0.55, true, false, true)
+	reset_timer.timeout.connect(func():
+		var tw = create_tween()
+		if tw:
+			tw.tween_property(Engine, "time_scale", 1.0, 0.3)
+	)
+	
+	# 2. Şok Dalgası ve Ekran Sarsıntısı
+	request_screen_shake(0.65)
+	SoundManager.play_wave_horn()
+	
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		var p = players[0]
+		p.i_frame_time = 2.2 # 2.2 saniye dokunulmazlık
+		var p_pos = p.global_position
+		
+		# Tüm çevredeki fareleri 420px geri püskürt ve 45 hasar ver
+		var enemies = get_tree().get_nodes_in_group("enemies")
+		for e in enemies:
+			if is_instance_valid(e) and not e.is_dead:
+				var diff = e.global_position - p_pos
+				var dist = diff.length()
+				if dist < 420.0:
+					var push_dir = diff.normalized() if dist > 0.0 else Vector2.UP
+					e.take_damage(45.0, push_dir, 450.0, true)
 
 func _trigger_thorns_damage() -> void:
 	var players = get_tree().get_nodes_in_group("player")
@@ -176,6 +330,48 @@ func _trigger_thorns_damage() -> void:
 			if p_pos.distance_to(e.global_position) < 130.0:
 				var k_dir = (e.global_position - p_pos).normalized()
 				e.take_damage(thorns_damage, k_dir, 200.0)
+
+func add_feline_rage(amount: float) -> void:
+	if is_feline_rage_active or is_game_over:
+		return
+	feline_rage = min(max_feline_rage, feline_rage + amount)
+	feline_rage_changed.emit(feline_rage, max_feline_rage)
+
+func activate_feline_rage() -> bool:
+	if is_feline_rage_active or feline_rage < max_feline_rage or is_game_over:
+		return false
+	
+	is_feline_rage_active = true
+	feline_rage = 0.0
+	feline_rage_changed.emit(feline_rage, max_feline_rage)
+	feline_rage_state_changed.emit(true)
+	
+	var orig_speed = move_speed
+	var orig_atk_spd = attack_speed
+	var orig_crit = crit_chance
+	
+	move_speed *= 1.65
+	attack_speed += 1.0
+	crit_chance += 0.25
+	
+	Engine.time_scale = 0.45
+	request_screen_shake(0.4)
+	request_chromatic_aberration(0.015, 0.3)
+	SoundManager.play_wave_horn()
+	
+	var rage_timer = get_tree().create_timer(5.0, true, false, true)
+	rage_timer.timeout.connect(func():
+		is_feline_rage_active = false
+		move_speed = orig_speed
+		attack_speed = orig_atk_spd
+		crit_chance = orig_crit
+		Engine.time_scale = 1.0
+		feline_rage_state_changed.emit(false)
+	)
+	return true
+
+func request_chromatic_aberration(strength: float = 0.012, duration: float = 0.15) -> void:
+	chromatic_aberration_requested.emit(strength, duration)
 
 func trigger_game_over() -> void:
 	if is_game_over:
@@ -209,6 +405,7 @@ func equip_weapon(slot_index: int, weapon_data: Dictionary) -> bool:
 	if not weapon_data.has("tier"):
 		weapon_data["tier"] = 1
 	equipped_weapons[slot_index] = weapon_data
+	_recalculate_weapon_synergies()
 	weapons_updated.emit()
 	return true
 
@@ -218,9 +415,11 @@ func sell_weapon(slot_index: int) -> int:
 	var w = equipped_weapons[slot_index]
 	var tier_val = w.get("tier", 1)
 	var base_c = w.get("cost", 8)
-	var refund = int(base_c * tier_val * 0.6)
+	var refund = max(4, int(base_c * pow(1.8, tier_val - 1) * 0.6))
 	equipped_weapons[slot_index] = null
 	add_coins(refund)
+	SoundManager.play_coin()
+	_recalculate_weapon_synergies()
 	weapons_updated.emit()
 	return refund
 
@@ -255,10 +454,41 @@ func combine_weapons(slot_a: int, slot_b: int) -> bool:
 		
 	w_a["tier"] = current_tier + 1
 	equipped_weapons[slot_b] = null
+	_recalculate_weapon_synergies()
 	weapons_updated.emit()
 	return true
 
 # --- STAT & STRATEJİK BUFF YÖNETİMİ ---
+
+func apply_draft_stat(stat_key: String, delta_val: float) -> void:
+	match stat_key:
+		"max_hp":
+			max_hp += delta_val
+			current_hp += delta_val
+			health_changed.emit(current_hp, max_hp)
+			player_stat_updated.emit("max_hp", max_hp)
+		"damage_multiplier":
+			damage_multiplier += delta_val
+			player_stat_updated.emit("damage_multiplier", damage_multiplier)
+		"attack_speed":
+			attack_speed = max(0.2, attack_speed + delta_val)
+			player_stat_updated.emit("attack_speed", attack_speed)
+		"armor":
+			armor += delta_val
+			player_stat_updated.emit("armor", armor)
+		"move_speed":
+			move_speed = max(80.0, move_speed + delta_val)
+			player_stat_updated.emit("move_speed", move_speed)
+		"crit_chance":
+			crit_chance = clampf(crit_chance + delta_val, 0.0, 1.0)
+			player_stat_updated.emit("crit_chance", crit_chance)
+		"hp_regen":
+			hp_regen += delta_val
+			player_stat_updated.emit("hp_regen", hp_regen)
+		"thorns_damage":
+			thorns_damage += delta_val
+			player_stat_updated.emit("thorns_damage", thorns_damage)
+
 
 func apply_item_buff(item_data: Dictionary, cost: int) -> bool:
 	if not spend_coins(cost):
@@ -314,3 +544,21 @@ func process_wave_completion_rewards() -> void:
 		var bonus = int(coins / 10) * piggy_bank_count
 		if bonus > 0:
 			add_coins(bonus)
+
+func request_screen_shake(amount: float) -> void:
+	screen_shake_requested.emit(amount)
+
+var _is_in_hitstop: bool = false
+
+func hitstop(duration: float = 0.05, time_scale: float = 0.05) -> void:
+	if is_game_over or not is_inside_tree() or get_tree().paused:
+		return
+	Engine.time_scale = time_scale
+	_is_in_hitstop = true
+	var timer = get_tree().create_timer(duration, true, false, true)
+	timer.timeout.connect(func():
+		Engine.time_scale = 1.0
+		_is_in_hitstop = false
+	)
+
+

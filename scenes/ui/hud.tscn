@@ -42,14 +42,28 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hpbg"]
-bg_color = Color(0.18, 0.18, 0.22, 0.92)
+bg_color = Color(0.10, 0.10, 0.14, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.35, 0.5, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lagfill"]
+bg_color = Color(0.95, 0.32, 0.15, 1.0)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hpbg"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hpfill"]
-bg_color = Color(0.15, 0.85, 0.35, 1)
+bg_color = Color(0.15, 0.88, 0.38, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -57,6 +71,7 @@ corner_radius_bottom_left = 6
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
+
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -204,11 +219,23 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -260.0
-offset_top = -60.0
+offset_top = -62.0
 offset_right = 260.0
 offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="DamageLagBar" type="ProgressBar" parent="Control/BottomBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hpbg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_lagfill")
+value = 100.0
+show_percentage = false
 
 [node name="HpBar" type="ProgressBar" parent="Control/BottomBar"]
 layout_mode = 1
@@ -217,7 +244,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_hpbg")
+theme_override_styles/background = SubResource("StyleBoxEmpty_hpbg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_hpfill")
 value = 100.0
 show_percentage = false
@@ -229,8 +256,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 18
 text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
+

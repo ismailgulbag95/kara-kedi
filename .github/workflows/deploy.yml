@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  export_web:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Web export directory
+        run: |
+          mkdir -v -p build/web
+
+      - name: Godot Web Export
+        run: |
+          godot -v --headless --export-release "Web" build/web/index.html
+
+      - name: Add coi-serviceworker for Cross-Origin Isolation
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.js > build/web/coi-serviceworker.js
+          sed -i 's/<head>/<head><script src="coi-serviceworker.js"><\/script>/' build/web/index.html
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          force_orphan: true

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_magnum.gd" id="1_wm"]
+[ext_resource type="Texture2D" path="res://assets/textures/magnum.png" id="2_wmtex"]
+
+[node name="WeaponMagnum" type="Node2D"]
+script = ExtResource("1_wm")
+
+[node name="Pivot" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Pivot"]
+position = Vector2(18, 0)
+texture = ExtResource("2_wmtex")
+
+[node name="Muzzle" type="Marker2D" parent="Pivot"]
+position = Vector2(32, 0)

@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/vfx/slash_arc_fx.gd" id="1_slash"]
+[ext_resource type="Texture2D" path="res://assets/textures/slash_arc.png" id="2_stex"]
+
+[node name="SlashArcFX" type="Sprite2D"]
+texture = ExtResource("2_stex")
+script = ExtResource("1_slash")

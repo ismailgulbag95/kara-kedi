@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_claws.gd" id="1_cl"]
+[ext_resource type="Texture2D" path="res://assets/textures/claws.png" id="2_cltx"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cl"]
+radius = 38.0
+height = 85.0
+
+[node name="WeaponClaws" type="Node2D"]
+script = ExtResource("1_cl")
+
+[node name="Pivot" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Pivot"]
+position = Vector2(22, 0)
+texture = ExtResource("2_cltx")
+
+[node name="HitboxArea" type="Area2D" parent="Pivot"]
+collision_layer = 4
+collision_mask = 6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pivot/HitboxArea"]
+position = Vector2(35, 0)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_cl")

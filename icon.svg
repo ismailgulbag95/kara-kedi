@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#121218"/>
+  <polygon points="32,48 44,16 60,38" fill="#181822"/>
+  <polygon points="68,38 84,16 96,48" fill="#181822"/>
+  <polygon points="38,44 46,24 54,38" fill="#e88da0"/>
+  <polygon points="74,38 82,24 90,44" fill="#e88da0"/>
+  <ellipse cx="64" cy="68" rx="44" ry="40" fill="#181822"/>
+  <ellipse cx="46" cy="62" rx="10" ry="8" fill="#4cd964"/>
+  <ellipse cx="82" cy="62" rx="10" ry="8" fill="#4cd964"/>
+  <rect x="44" y="58" width="4" height="8" rx="2" fill="#0a0a0e"/>
+  <rect x="80" y="58" width="4" height="8" rx="2" fill="#0a0a0e"/>
+  <ellipse cx="64" cy="76" rx="8" ry="6" fill="#f0f0f5"/>
+  <polygon points="61,72 67,72 64,76" fill="#ff5c8a"/>
+  <!-- Crossed glowing swords in front -->
+  <line x1="20" y1="108" x2="108" y2="20" stroke="#00e676" stroke-width="6" stroke-linecap="round"/>
+  <line x1="108" y1="108" x2="20" y2="20" stroke="#00e676" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/fish_projectile.gd" id="1_fsh"]
+[ext_resource type="Texture2D" path="res://assets/textures/fish_bone.png" id="2_fshtx"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fsh"]
+radius = 12.0
+
+[node name="FishProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_fsh")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_fshtx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_fsh")

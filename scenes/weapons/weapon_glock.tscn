@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_glock.gd" id="1_wg"]
+[ext_resource type="Texture2D" path="res://assets/textures/glock.png" id="2_wgtex"]
+
+[node name="WeaponGlock" type="Node2D"]
+script = ExtResource("1_wg")
+
+[node name="Pivot" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Pivot"]
+position = Vector2(16, 0)
+texture = ExtResource("2_wgtex")
+
+[node name="Muzzle" type="Marker2D" parent="Pivot"]
+position = Vector2(28, 0)

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_yarn_bomb.gd" id="1_wy"]
+[ext_resource type="Texture2D" path="res://assets/textures/yarn_bomb.png" id="2_ytx"]
+
+[node name="WeaponYarnBomb" type="Node2D"]
+script = ExtResource("1_wy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("2_ytx")

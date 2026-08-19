@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/spitter_projectile.gd" id="1_spit"]
+[ext_resource type="Texture2D" path="res://assets/textures/projectile_acid.png" id="2_acid"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_acid"]
+radius = 9.0
+
+[node name="SpitterProjectile" type="Area2D" groups=["enemy_hitbox"]]
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("1_spit")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("2_acid")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_acid")

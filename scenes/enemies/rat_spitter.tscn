@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/rat_spitter.gd" id="1_spit"]
+[ext_resource type="Texture2D" path="res://assets/textures/rat_spitter.png" id="2_spittx"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_col"]
+radius = 12.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 14.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hit"]
+radius = 13.0
+
+[node name="RatSpitter" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_spit")
+preferred_distance = 220.0
+shoot_interval = 2.5
+max_health = 32.0
+move_speed = 100.0
+contact_damage = 10.0
+base_coin_value = 2.0
+bonus_coin_chance = 0.60
+score_value = 150
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_spittx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_col")
+
+[node name="HurtboxArea" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxArea"]
+shape = SubResource("CircleShape2D_hurt")
+
+[node name="HitboxArea" type="Area2D" parent="." groups=["enemy_hitbox"]]
+collision_layer = 8
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxArea"]
+shape = SubResource("CircleShape2D_hit")

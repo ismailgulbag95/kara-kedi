@@ -486,6 +486,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 		# 1. Durum: Envanterde aynı silah var -> "AL & BİRLEŞTİR"
 		if existing_slot != -1 and card_tier < 4:
 			var combine_buy_btn = Button.new()
+			combine_buy_btn.custom_minimum_size = Vector2(0, 44)
 			var next_tier = card_tier + 1
 			combine_buy_btn.text = "⚡ AL & BİRLEŞTİR (T%d -> T%d) [%d K]" % [card_tier, next_tier, cost]
 			combine_buy_btn.disabled = not can_afford
@@ -507,6 +508,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 		# 2. Durum: Boş yuva varsa normal "AL"
 		if empty_slot != -1:
 			var buy_btn = Button.new()
+			buy_btn.custom_minimum_size = Vector2(0, 44)
 			buy_btn.text = "SATIN AL (%d Coin)" % cost
 			buy_btn.disabled = not can_afford
 			buy_btn.add_theme_font_size_override("font_size", 14)
@@ -528,6 +530,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 			vbox.add_child(buy_btn)
 		elif existing_slot == -1:
 			var full_btn = Button.new()
+			full_btn.custom_minimum_size = Vector2(0, 44)
 			full_btn.text = "YUVALAR DOLU (3/3)"
 			full_btn.disabled = true
 			full_btn.add_theme_font_size_override("font_size", 13)
@@ -535,6 +538,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 	else:
 		# Pasif İtem Alımı
 		var buy_btn = Button.new()
+		buy_btn.custom_minimum_size = Vector2(0, 44)
 		buy_btn.text = "SATIN AL (%d Coin)" % cost
 		buy_btn.disabled = not can_afford
 		buy_btn.add_theme_font_size_override("font_size", 14)
@@ -550,7 +554,7 @@ func _create_card_ui(card_data: Dictionary, _index: int) -> void:
 	
 	# 5. Özel Pixel Art Kilit Butonu (lock_closed.png / lock_open.png)
 	var lock_btn = Button.new()
-	lock_btn.custom_minimum_size = Vector2(0, 34)
+	lock_btn.custom_minimum_size = Vector2(0, 38)
 	var lock_icon_path = "res://assets/textures/ui/lock_closed.png" if is_locked else "res://assets/textures/ui/lock_open.png"
 	if ResourceLoader.exists(lock_icon_path):
 		lock_btn.icon = load(lock_icon_path)

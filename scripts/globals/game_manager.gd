@@ -88,6 +88,8 @@ func _process(delta: float) -> void:
 	if hp_regen > 0.0 and is_wave_active and not is_game_over and current_hp < max_hp:
 		heal_player(hp_regen * delta)
 
+var selected_character: String = "standard"
+
 func reset_game() -> void:
 	max_hp = 100.0
 	current_hp = max_hp

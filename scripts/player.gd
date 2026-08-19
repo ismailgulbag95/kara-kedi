@@ -59,7 +59,7 @@ func _load_all_sprites() -> void:
 		sprite.texture = idle_textures["south"]
 
 	var anim_base = "res://assets/textures/player_character/animations/Running/"
-	var run_dirs = ["south", "south-east", "east", "north-east", "north", "north-west", "west"]
+	var run_dirs = ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"]
 	for d in run_dirs:
 		var frames: Array[Texture2D] = []
 		for f in range(8):

@@ -150,6 +150,7 @@ func _generate_bgm_loop(track_name: String) -> AudioStreamWAV:
 	for i in range(num_samples):
 		var t = float(i) / float(sample_rate)
 		var beat = fmod(t * bps, 1.0)
+		@warning_ignore("unused_variable")
 		var progress = float(i) / float(num_samples)
 		
 		var sample_val = 0.0

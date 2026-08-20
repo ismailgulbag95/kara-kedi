@@ -118,8 +118,8 @@ func _perform_minion_roar() -> void:
 			minion.global_position = global_position + offset
 			root_scene.call_deferred("add_child", minion)
 
-func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 0.0, is_crit: bool = false) -> void:
-	super.take_damage(amount, knockback_dir, knock_force * 0.15, is_crit)
+func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 0.0, is_crit: bool = false, source_weapon: String = "") -> void:
+	super.take_damage(amount, knockback_dir, knock_force * 0.15, is_crit, source_weapon)
 	boss_hp_updated.emit(max(0.0, current_health), max_health)
 
 func _die() -> void:

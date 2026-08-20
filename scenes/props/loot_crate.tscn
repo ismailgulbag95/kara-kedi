@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://loot_crate_scene_01"]
 
 [ext_resource type="Script" path="res://scripts/props/loot_crate.gd" id="1_crate"]
-[ext_resource type="Texture2D" path="res://assets/textures/loot_crate.png" id="2_ctex"]
+[ext_resource type="Texture2D" path="res://assets/textures/loot_crate_wood.png" id="2_ctex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(24, 24)
@@ -20,7 +20,7 @@ texture = ExtResource("2_ctex")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="HurtboxArea" type="Area2D" parent="."]
+[node name="HurtboxArea" type="Area2D" parent="." groups=["enemy_hurtbox"]]
 collision_layer = 4
 collision_mask = 2
 

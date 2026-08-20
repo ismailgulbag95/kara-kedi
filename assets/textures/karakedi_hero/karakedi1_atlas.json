@@ -1,0 +1,29 @@
+﻿{
+    "meta":  {
+                 "app":  "Sprite Sage / Pixis",
+                 "format":  "RGBA8888",
+                 "version":  "1.0",
+                 "image":  "karakedi1_spritesheet.png"
+             },
+    "animations":  {
+                       "attack":  [
+                                      "frames/attack_0.png",
+                                      "frames/attack_1.png",
+                                      "frames/attack_2.png"
+                                  ],
+                       "idle":  [
+                                    "frames/idle_0.png",
+                                    "frames/idle_1.png",
+                                    "frames/idle_2.png",
+                                    "frames/idle_3.png"
+                                ],
+                       "walk":  [
+                                    "frames/walk_0.png",
+                                    "frames/walk_1.png",
+                                    "frames/walk_2.png",
+                                    "frames/walk_3.png",
+                                    "frames/walk_4.png",
+                                    "frames/walk_5.png"
+                                ]
+                   }
+}

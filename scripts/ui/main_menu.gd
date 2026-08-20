@@ -26,15 +26,13 @@ func _ready() -> void:
 	
 	_setup_codex_button()
 	_setup_shelter_button()
-	_setup_class_button(btn_standard, card_standard, "standard")
-	_setup_class_button(btn_marksman, card_marksman, "marksman")
-	_setup_class_button(btn_brawler, card_brawler, "brawler")
-	_setup_class_button(btn_tank, card_tank, "tank")
-	_setup_class_button(btn_pirate, card_pirate, "pirate")
+	_refresh_character_cards()
+	GameManager.character_unlocked.connect(func(_id): _refresh_character_cards())
+	GameManager.quest_progress_updated.connect(func(_t, _c, _tgt): _refresh_character_cards())
 
 func _setup_shelter_button() -> void:
 	var s_btn = Button.new()
-	s_btn.text = "🛖 BARINAK (MAMA AĞACI)"
+	s_btn.text = "🛖 BARINAK"
 	s_btn.custom_minimum_size = Vector2(0, 36)
 	s_btn.anchor_left = 0.0
 	s_btn.anchor_top = 1.0
@@ -44,23 +42,6 @@ func _setup_shelter_button() -> void:
 	s_btn.offset_right = -6
 	s_btn.offset_top = -48
 	s_btn.offset_bottom = -12
-	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.18, 0.14, 0.08, 0.95)
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.border_color = Color(1.0, 0.75, 0.25, 1.0)
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_right = 8
-	style.corner_radius_bottom_left = 8
-	s_btn.add_theme_stylebox_override("normal", style)
-	s_btn.add_theme_color_override("font_color", Color(1.0, 0.88, 0.4))
-	s_btn.add_theme_font_size_override("font_size", 11)
-	
-	UIJuiceHelper.attach_button_juice(s_btn, 0.94, 1.05)
 	s_btn.pressed.connect(func():
 		var root = get_tree().current_scene
 		if root and root.has_node("ShelterModal"):
@@ -70,7 +51,7 @@ func _setup_shelter_button() -> void:
 
 func _setup_codex_button() -> void:
 	var c_btn = Button.new()
-	c_btn.text = "📖 SOKAK GÜNCESİ (CODEX)"
+	c_btn.text = "📖 CODEX"
 	c_btn.custom_minimum_size = Vector2(0, 36)
 	c_btn.anchor_left = 0.5
 	c_btn.anchor_top = 1.0
@@ -80,23 +61,6 @@ func _setup_codex_button() -> void:
 	c_btn.offset_right = -12
 	c_btn.offset_top = -48
 	c_btn.offset_bottom = -12
-	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.10, 0.14, 0.22, 0.95)
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.border_color = Color(0.4, 0.65, 0.9, 1.0)
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_right = 8
-	style.corner_radius_bottom_left = 8
-	c_btn.add_theme_stylebox_override("normal", style)
-	c_btn.add_theme_color_override("font_color", Color(0.85, 0.92, 1.0))
-	c_btn.add_theme_font_size_override("font_size", 11)
-	
-	UIJuiceHelper.attach_button_juice(c_btn, 0.94, 1.05)
 	c_btn.pressed.connect(func():
 		var root = get_tree().current_scene
 		if root and root.has_node("CodexModal"):
@@ -104,18 +68,80 @@ func _setup_codex_button() -> void:
 	)
 	panel.add_child(c_btn)
 
+func _refresh_character_cards() -> void:
+	_setup_class_button(btn_standard, card_standard, "standard")
+	_setup_class_button(btn_marksman, card_marksman, "marksman")
+	_setup_class_button(btn_brawler, card_brawler, "brawler")
+	_setup_class_button(btn_tank, card_tank, "chonky")
+	_setup_class_button(btn_pirate, card_pirate, "pirate")
+
 func _setup_class_button(btn: Button, card: PanelContainer, char_id: String) -> void:
-	if btn:
+	if not card or not btn:
+		return
+		
+	var c = CharacterData.get_character(char_id)
+	var is_unlocked = GameManager.unlocked_characters.has(char_id) or c.get("unlocked_by_default", false)
+	
+	var info_vbox = card.get_node_or_null("HBox/InfoVBox")
+	var buff_label: Label = null
+	var name_label: Label = null
+	var wpn_label: Label = null
+	if info_vbox:
+		buff_label = info_vbox.get_node_or_null("Buff")
+		name_label = info_vbox.get_node_or_null("Name")
+		wpn_label = info_vbox.get_node_or_null("Weapon")
+	
+	card.modulate = Color.WHITE
+	
+	if not is_unlocked:
+		# Karakter adı ve silahını hafif koyulaştır ama kartı kapatma
+		if name_label:
+			name_label.modulate = Color(0.7, 0.7, 0.75, 0.8)
+		if wpn_label:
+			wpn_label.modulate = Color(0.6, 0.65, 0.7, 0.7)
+			
+		var q_type = c.get("unlock_quest_type", "")
+		var q_target = c.get("unlock_quest_target", 1)
+		var q_curr = GameManager.quest_progress.get(q_type, 0)
+		var pct = int((float(q_curr) / float(q_target)) * 100.0)
+		
+		btn.text = "🔒 %d/%d" % [q_curr, q_target]
+		btn.disabled = true
+		btn.tooltip_text = ""
+		btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+		
+		# GEREKSİNİM: %100 Parlak, Altın Sarısı ve Net Görünür (Silik Değil!)
+		if buff_label:
+			buff_label.modulate = Color.WHITE
+			buff_label.text = "🔒 GEREKSİNİM: %s\n   📊 İlerleme: %d / %d (%%%d)" % [c.get("unlock_quest", "Kilitli"), q_curr, q_target, pct]
+			buff_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.3))
+			buff_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
+			buff_label.add_theme_constant_override("shadow_offset_x", 1)
+			buff_label.add_theme_constant_override("shadow_offset_y", 1)
+			buff_label.add_theme_font_size_override("font_size", 11)
+			buff_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	else:
+		if name_label:
+			name_label.modulate = Color.WHITE
+		if wpn_label:
+			wpn_label.modulate = Color.WHITE
+			
+		btn.disabled = false
+		btn.text = "SEÇ & OYNA"
+		btn.tooltip_text = ""
 		btn.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 		UIJuiceHelper.attach_button_juice(btn, 0.92, 1.06)
-		btn.pressed.connect(func():
-			_on_character_chosen(char_id)
-		)
-	if card:
-		card.gui_input.connect(func(event: InputEvent):
-			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-				_on_character_chosen(char_id)
-		)
+		
+		if buff_label:
+			buff_label.modulate = Color.WHITE
+			buff_label.text = "+ " + c["buffs"][0]
+			buff_label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.45))
+			buff_label.add_theme_font_size_override("font_size", 10)
+			buff_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		
+		if btn.is_connected("pressed", _on_character_chosen):
+			btn.disconnect("pressed", _on_character_chosen)
+		btn.pressed.connect(func(): _on_character_chosen(char_id))
 
 func _on_character_chosen(char_id: String) -> void:
 	SoundManager.play_wave_horn()

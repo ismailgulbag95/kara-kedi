@@ -3,14 +3,13 @@ extends RefCounted
 
 ## Karakter Sınıfları Veritabanı ve Başarım/Kilit Tanımları (Static Data)
 
-
 const CHARACTERS = {
 	"standard": {
 		"id": "standard",
 		"name": "Kara Kedi",
 		"title": "Dengeli Sokak Savaşçısı",
 		"description": "Klasik, dengeli ve her alanda istikrarlı usta sokak kedisi.",
-		"portrait": "res://assets/textures/player_character/rotations/south.png",
+		"portrait": "res://assets/textures/karakedi_hero/rotations/south.png",
 		"start_weapon": "sword",
 		"start_weapon_name": "Kara Çelik Kılıç",
 		"max_hp": 100.0,
@@ -18,19 +17,22 @@ const CHARACTERS = {
 		"dmg_mult": 1.0,
 		"attack_speed": 1.0,
 		"crit_chance": 0.05,
+		"crit_mult": 2.0,
 		"armor": 0.0,
 		"thorns": 0.0,
 		"range_bonus": 0.0,
 		"coin_mult": 1.0,
+		"magnet_radius": 130.0,
 		"buffs": ["Tüm temel statlar dengeli ve çok yönlü."],
 		"debuffs": ["Özel bir dezavantajı yok."],
-		"unlocked_by_default": true
+		"unlocked_by_default": true,
+		"unlock_quest": "Başlangıçta açık."
 	},
 	"marksman": {
 		"id": "marksman",
 		"name": "Nişancı Kedi",
 		"title": "Keskin Gözlü Kovboy",
-		"description": "Uzak mesafeden seri mermiler yağdıran hızlı silahşör.",
+		"description": "Uzak mesafeden yüksek hasar ve kritik mermiler yağdıran keskin nişancı.",
 		"portrait": "res://assets/textures/player_character/rotations/south.png",
 		"start_weapon": "glock",
 		"start_weapon_name": "Seri Glock",
@@ -39,13 +41,18 @@ const CHARACTERS = {
 		"dmg_mult": 1.25,
 		"attack_speed": 1.1,
 		"crit_chance": 0.15,
+		"crit_mult": 2.2,
 		"armor": 0.0,
 		"thorns": 0.0,
 		"range_bonus": 60.0,
 		"coin_mult": 1.0,
-		"buffs": ["+%25 Hasar & +60px Saldırı Menzili", "+%15 Kritik Vuruş Şansı"],
-		"debuffs": ["-15 Maksimum Can (85 HP)"],
-		"unlocked_by_default": true
+		"magnet_radius": 130.0,
+		"buffs": ["+%25 Hasar & +60px Menzil", "+%15 Kritik Şansı & +10 Hız"],
+		"debuffs": ["-15 Can (85 HP)"],
+		"unlocked_by_default": false,
+		"unlock_quest_type": "magnum_kills",
+		"unlock_quest_target": 100,
+		"unlock_quest": "Ağır Magnum ile toplam 100 düşman öldür."
 	},
 	"brawler": {
 		"id": "brawler",
@@ -60,34 +67,44 @@ const CHARACTERS = {
 		"dmg_mult": 1.0,
 		"attack_speed": 1.4,
 		"crit_chance": 0.08,
+		"crit_mult": 2.0,
 		"armor": 1.0,
 		"thorns": 0.0,
 		"range_bonus": -25.0,
 		"coin_mult": 1.0,
-		"buffs": ["+%40 Saldırı Hızı", "+25 Hareket Hızı"],
-		"debuffs": ["-%25 Saldırı Menzili"],
-		"unlocked_by_default": true
+		"magnet_radius": 130.0,
+		"buffs": ["+%40 Saldırı Hızı", "+25 Hareket Hızı (245)", "+1 Zırh"],
+		"debuffs": ["-%25 Saldırı Menzili", "-10 Can (90 HP)"],
+		"unlocked_by_default": false,
+		"unlock_quest_type": "claws_kills",
+		"unlock_quest_target": 150,
+		"unlock_quest": "Çift Pençe ile toplam 150 düşman öldür."
 	},
-	"tank": {
-		"id": "tank",
-		"name": "Zırhlı Şövalye",
-		"title": "Yıkılmaz Kaya Kedi",
-		"description": "Ağır zırhı ve dikenleriyle fare sürülerine meydan okuyan dayanıklı tank.",
+	"chonky": {
+		"id": "chonky",
+		"name": "Şişko Kedi",
+		"title": "Tombul & Yıkılmaz Kaya",
+		"description": "Ağır cüssesi, zırhı ve dikenleriyle fare sürülerini ezen dayanıklı tank.",
 		"portrait": "res://assets/textures/player_character/rotations/south.png",
 		"start_weapon": "sword",
 		"start_weapon_name": "Kara Çelik Kılıç",
-		"max_hp": 135.0,
-		"move_speed": 185.0,
+		"max_hp": 140.0,
+		"move_speed": 180.0,
 		"dmg_mult": 1.0,
 		"attack_speed": 0.9,
 		"crit_chance": 0.05,
+		"crit_mult": 2.0,
 		"armor": 4.0,
 		"thorns": 8.0,
 		"range_bonus": 0.0,
 		"coin_mult": 1.0,
-		"buffs": ["+35 Maksimum Can (135 HP)", "+4 Zırh & +8 Yansıtılan Diken Hasarı"],
-		"debuffs": ["-%15 Hareket Hızı (185)"],
-		"unlocked_by_default": true
+		"magnet_radius": 130.0,
+		"buffs": ["+40 Devasa Can (140 HP)", "+4 Zırh & +8 Yansıtılan Diken Hasarı"],
+		"debuffs": ["-40 Hareket Hızı (180)", "-%10 Saldırı Hızı"],
+		"unlocked_by_default": false,
+		"unlock_quest_type": "milk_collected",
+		"unlock_quest_target": 12,
+		"unlock_quest": "Oyunlarda toplam 12 adet Şifalı Süt Kasesi (🥛) topla."
 	},
 	"pirate": {
 		"id": "pirate",
@@ -102,13 +119,18 @@ const CHARACTERS = {
 		"dmg_mult": 0.85,
 		"attack_speed": 1.0,
 		"crit_chance": 0.20,
+		"crit_mult": 2.2,
 		"armor": 0.0,
 		"thorns": 0.0,
 		"range_bonus": 20.0,
 		"coin_mult": 1.5,
-		"buffs": ["+%50 Fazla Koin Kazancı", "+%20 Yüksek Kritik Şansı"],
-		"debuffs": ["-%15 Taban Hasar"],
-		"unlocked_by_default": true
+		"magnet_radius": 180.0,
+		"buffs": ["+%50 Fazla Altın Kazancı (1.5x)", "+%20 Kritik Şansı", "+50px Mıknatıs Alanı"],
+		"debuffs": ["-%15 Taban Hasar (0.85x)", "-10 Can (90 HP)"],
+		"unlocked_by_default": false,
+		"unlock_quest_type": "total_coins",
+		"unlock_quest_target": 300,
+		"unlock_quest": "Oyunlarda toplam 300 Altın topla."
 	}
 }
 
@@ -117,3 +139,11 @@ static func get_character(id: String) -> Dictionary:
 		return CHARACTERS[id]
 	return CHARACTERS["standard"]
 
+static func get_all_characters() -> Array:
+	return [
+		CHARACTERS["standard"],
+		CHARACTERS["marksman"],
+		CHARACTERS["brawler"],
+		CHARACTERS["chonky"],
+		CHARACTERS["pirate"]
+	]

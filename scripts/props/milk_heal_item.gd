@@ -57,6 +57,7 @@ func _collect() -> void:
 	is_collected = true
 	
 	GameManager.heal_player(heal_amount)
+	GameManager.record_milk_collected()
 	SoundManager.play_coin()
 	
 	# Uçuşan Yeşil İyileşme Metni

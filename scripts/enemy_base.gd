@@ -102,16 +102,21 @@ func _calculate_separation() -> Vector2:
 	var separation = Vector2.ZERO
 	var nearby_enemies = get_tree().get_nodes_in_group("enemies")
 	for other in nearby_enemies:
-		if other != self and is_instance_valid(other) and not other.is_dead:
+		if other != self and is_instance_valid(other) and other is CharacterBody2D and not other.get("is_dead"):
 			var diff = global_position - other.global_position
 			var dist = diff.length()
 			if dist < 28.0 and dist > 0.0:
 				separation += diff.normalized() / dist
 	return separation.normalized()
 
-func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 0.0, is_crit: bool = false) -> void:
+var last_attacker_weapon: String = ""
+
+func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 0.0, is_crit: bool = false, source_weapon: String = "") -> void:
 	if is_dead:
 		return
+		
+	if source_weapon != "":
+		last_attacker_weapon = source_weapon
 		
 	current_health -= amount
 	knockback_velocity = knockback_dir * knock_force
@@ -173,6 +178,9 @@ func _die() -> void:
 	GameManager.enemies_killed += 1
 	GameManager.score += score_value
 	GameManager.add_feline_rage(3.5)
+	
+	if last_attacker_weapon != "":
+		GameManager.record_weapon_kill(last_attacker_weapon)
 	
 	# Düşman ölüm sarsıntısı & mikro hitstop
 	if is_in_group("boss") or has_node("BossHpBar"):

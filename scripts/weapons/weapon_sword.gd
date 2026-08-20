@@ -66,7 +66,7 @@ func _find_closest_enemy_in_reach() -> Node2D:
 	var min_dist: float = SWORD_MAX_REACH * (GameManager.attack_range / 100.0)
 	
 	for e in enemies:
-		if is_instance_valid(e) and not e.is_dead and not e.is_queued_for_deletion():
+		if is_instance_valid(e) and not e.get("is_dead") and not e.is_queued_for_deletion():
 			var dist = global_position.distance_to(e.global_position)
 			if dist <= min_dist:
 				min_dist = dist

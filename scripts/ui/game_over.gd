@@ -16,6 +16,7 @@ func _ready() -> void:
 	UIJuiceHelper.attach_button_juice(retry_btn)
 
 func _on_game_over() -> void:
+	Engine.time_scale = 1.0
 	visible = true
 	get_tree().paused = true
 	_animate_stats_count()
@@ -49,6 +50,7 @@ func _animate_stats_count() -> void:
 		]
 
 func _on_retry_pressed() -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	GameManager.reset_game()
 	get_tree().reload_current_scene()

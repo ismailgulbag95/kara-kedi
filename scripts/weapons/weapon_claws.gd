@@ -66,7 +66,7 @@ func _find_closest_enemy_in_reach() -> Node2D:
 	var min_dist: float = CLAWS_MAX_REACH * (GameManager.attack_range / 100.0)
 	
 	for e in enemies:
-		if is_instance_valid(e) and not e.is_dead and not e.is_queued_for_deletion():
+		if is_instance_valid(e) and not e.get("is_dead") and not e.is_queued_for_deletion():
 			var dist = global_position.distance_to(e.global_position)
 			if dist <= min_dist:
 				min_dist = dist
@@ -95,5 +95,5 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 			var is_crit = randf() < (GameManager.crit_chance + 0.25 + (tier - 1) * 0.08)
 			var dmg = (GameManager.base_damage * 0.7) * tier_mult * (GameManager.crit_multiplier if is_crit else 1.0)
 			var knock_dir = (enemy.global_position - global_position).normalized()
-			enemy.take_damage(dmg, knock_dir, 160.0, is_crit)
+			enemy.take_damage(dmg, knock_dir, 160.0, is_crit, "claws")
 			SoundManager.play_hit()

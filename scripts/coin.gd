@@ -6,6 +6,11 @@ extends Area2D
 
 @export var coin_value: float = 1.0
 @export var is_small_coin: bool = false
+var value: float:
+	get:
+		return coin_value
+	set(v):
+		coin_value = float(v)
 
 var is_attracted: bool = false
 var is_collected: bool = false

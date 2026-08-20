@@ -39,6 +39,7 @@ shader_parameter/rage_intensity = 0.0
 script = ExtResource("1_main")
 
 [node name="OuterDeepStreet" type="TextureRect" parent="." unique_id=140560335]
+z_index = -30
 modulate = Color(0.08, 0.1, 0.15, 1)
 texture_repeat = 2
 offset_left = -3600.0
@@ -55,6 +56,7 @@ script = ExtResource("4_city_depth")
 script = ExtResource("18_env")
 
 [node name="RooftopAbyssShadow" type="ColorRect" parent="." unique_id=1151889764]
+z_index = -20
 offset_left = -745.0
 offset_top = -1075.0
 offset_right = 745.0
@@ -62,6 +64,7 @@ offset_bottom = 1075.0
 color = Color(0.01, 0.01, 0.03, 0.94)
 
 [node name="RooftopFloor" type="TextureRect" parent="." unique_id=1678488442]
+z_index = -10
 modulate = Color(0.85, 0.88, 0.95, 1)
 texture_repeat = 2
 offset_left = -680.0
@@ -72,6 +75,7 @@ texture = ExtResource("2_floor")
 stretch_mode = 1
 
 [node name="ParapetVisualTop" type="TextureRect" parent="." unique_id=1233267343]
+z_index = -8
 modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
@@ -82,6 +86,7 @@ texture = ExtResource("3_parapet")
 stretch_mode = 1
 
 [node name="ParapetVisualBottom" type="TextureRect" parent="." unique_id=1300527701]
+z_index = -8
 modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
@@ -92,6 +97,7 @@ texture = ExtResource("3_parapet")
 stretch_mode = 1
 
 [node name="ParapetVisualLeft" type="TextureRect" parent="." unique_id=1865802659]
+z_index = -8
 modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
@@ -102,6 +108,7 @@ texture = ExtResource("3_parapet")
 stretch_mode = 1
 
 [node name="ParapetVisualRight" type="TextureRect" parent="." unique_id=1272854192]
+z_index = -8
 modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = 656.0

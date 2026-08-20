@@ -16,6 +16,16 @@ signal death_defiance_triggered(remaining_lives: int)
 signal chromatic_aberration_requested(strength: float, duration: float)
 signal feline_rage_changed(current_rage: float, max_rage: float)
 signal feline_rage_state_changed(is_active: bool)
+signal character_unlocked(char_id: String)
+signal quest_progress_updated(quest_type: String, current_val: int, target_val: int)
+
+var unlocked_characters: Array = ["standard"]
+var quest_progress: Dictionary = {
+	"magnum_kills": 0,
+	"claws_kills": 0,
+	"milk_collected": 0,
+	"total_coins": 0
+}
 
 var lives_remaining: int = 1
 var feline_rage: float = 0.0
@@ -134,6 +144,10 @@ func save_shelter() -> void:
 	var cfg = ConfigFile.new()
 	cfg.set_value("shelter", "whiskers", whiskers)
 	cfg.set_value("shelter", "high_score", high_score)
+	cfg.set_value("characters", "selected_character", selected_character)
+	cfg.set_value("characters", "unlocked", unlocked_characters)
+	for q in quest_progress:
+		cfg.set_value("quests", q, quest_progress[q])
 	for k in shelter_upgrades:
 		cfg.set_value("shelter", "lvl_" + k, shelter_upgrades[k])
 	cfg.save(SAVE_FILE_PATH)
@@ -143,10 +157,66 @@ func load_shelter() -> void:
 	if cfg.load(SAVE_FILE_PATH) == OK:
 		whiskers = cfg.get_value("shelter", "whiskers", 50)
 		high_score = cfg.get_value("shelter", "high_score", 0)
+		selected_character = cfg.get_value("characters", "selected_character", "standard")
+		unlocked_characters = cfg.get_value("characters", "unlocked", ["standard"])
+		if not unlocked_characters.has("standard"):
+			unlocked_characters.append("standard")
+		for q in quest_progress:
+			quest_progress[q] = cfg.get_value("quests", q, 0)
 		for k in shelter_upgrades:
 			shelter_upgrades[k] = cfg.get_value("shelter", "lvl_" + k, 0)
 	else:
 		whiskers = 50
+		unlocked_characters = ["standard"]
+
+func record_weapon_kill(weapon_id: String) -> void:
+	if weapon_id == "magnum":
+		quest_progress["magnum_kills"] = quest_progress.get("magnum_kills", 0) + 1
+		quest_progress_updated.emit("magnum_kills", quest_progress["magnum_kills"], 100)
+	elif weapon_id == "claws":
+		quest_progress["claws_kills"] = quest_progress.get("claws_kills", 0) + 1
+		quest_progress_updated.emit("claws_kills", quest_progress["claws_kills"], 150)
+	_check_character_unlocks()
+
+func record_milk_collected() -> void:
+	quest_progress["milk_collected"] = quest_progress.get("milk_collected", 0) + 1
+	quest_progress_updated.emit("milk_collected", quest_progress["milk_collected"], 12)
+	_check_character_unlocks()
+
+func record_coins_collected(amount: int) -> void:
+	quest_progress["total_coins"] = quest_progress.get("total_coins", 0) + amount
+	quest_progress_updated.emit("total_coins", quest_progress["total_coins"], 300)
+	_check_character_unlocks()
+
+func _check_character_unlocks() -> void:
+	var newly_unlocked = false
+	
+	# Nişancı Kedi (100 Magnum kills)
+	if not unlocked_characters.has("marksman") and quest_progress.get("magnum_kills", 0) >= 100:
+		unlocked_characters.append("marksman")
+		character_unlocked.emit("marksman")
+		newly_unlocked = true
+		
+	# Vahşi Pençeci (150 Claws kills)
+	if not unlocked_characters.has("brawler") and quest_progress.get("claws_kills", 0) >= 150:
+		unlocked_characters.append("brawler")
+		character_unlocked.emit("brawler")
+		newly_unlocked = true
+		
+	# Şişko Kedi (12 Milk bowls)
+	if not unlocked_characters.has("chonky") and quest_progress.get("milk_collected", 0) >= 12:
+		unlocked_characters.append("chonky")
+		character_unlocked.emit("chonky")
+		newly_unlocked = true
+		
+	# Korsan Kedi (300 Total Coins)
+	if not unlocked_characters.has("pirate") and quest_progress.get("total_coins", 0) >= 300:
+		unlocked_characters.append("pirate")
+		character_unlocked.emit("pirate")
+		newly_unlocked = true
+		
+	if newly_unlocked:
+		save_shelter()
 
 func get_shelter_cost(stat_key: String) -> int:
 	var lvl = shelter_upgrades.get(stat_key, 0)
@@ -440,7 +510,7 @@ func _execute_death_defiance() -> void:
 		# Tüm çevredeki fareleri 420px geri püskürt ve 45 hasar ver
 		var enemies = get_tree().get_nodes_in_group("enemies")
 		for e in enemies:
-			if is_instance_valid(e) and not e.is_dead:
+			if is_instance_valid(e) and not e.get("is_dead"):
 				var diff = e.global_position - p_pos
 				var dist = diff.length()
 				if dist < 420.0:
@@ -688,5 +758,3 @@ func hitstop(duration: float = 0.05, time_scale: float = 0.05) -> void:
 		Engine.time_scale = 1.0
 		_is_in_hitstop = false
 	)
-
-

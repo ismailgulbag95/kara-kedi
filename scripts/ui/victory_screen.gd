@@ -14,6 +14,7 @@ func _ready() -> void:
 	UIJuiceHelper.attach_button_juice(retry_btn)
 
 func _on_victory() -> void:
+	Engine.time_scale = 1.0
 	visible = true
 	get_tree().paused = true
 	_animate_victory_stats()

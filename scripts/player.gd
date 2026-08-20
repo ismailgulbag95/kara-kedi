@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 ## Siyah Kedi Ana Karakteri (Player Controller)
-## 1.6x Dengeli Ölçek, 8-Yönlü Koşma, Dinamik 3 Silah Yuvası ve Sağlam Hasar Algılama
+## 8-Yönlü Ultra Akıcı Koşma ve Idle Animasyonları, Dinamik 3 Silah Yuvası (Z-Derinliği), Sağlam Dokü Yükleme ve Hasar Algılama
 
 @export var max_health: float = 100.0
 
@@ -17,15 +17,17 @@ extends CharacterBody2D
 var i_frame_time: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 
-# 8 Yönlü Duruş ve Koşu Dokuları
-var idle_textures: Dictionary = {}
-var run_animations: Dictionary = {}
+# 8-Yönlü Karakter Animasyon Veritabanı
+const DIRECTIONS = ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"]
+var hero_idle_rotations: Dictionary = {}
+var hero_running_animations: Dictionary = {}
+var current_facing: String = "south"
 
-var current_dir_name: String = "south"
-var anim_frame_idx: int = 0
+var walk_frame_idx: int = 0
 var anim_timer: float = 0.0
-const FRAME_DURATION: float = 0.085
-const PLAYER_BASE_SCALE: float = 2.0 # Tam 2x integer piksel uyumu
+var step_bob_timer: float = 0.0
+const FRAME_DURATION: float = 0.075
+const PLAYER_BASE_SCALE: float = 1.5 # 48x48 piksel karakter için dengeli arena ölçeği
 
 const WEAPON_SCENES = {
 	"sword": preload("res://scenes/weapons/weapon_sword.tscn"),
@@ -40,10 +42,6 @@ const WEAPON_SCENES = {
 	"fused_storm_bow": preload("res://scenes/weapons/weapon_bow.tscn")
 }
 
-const PAW_PRINT_SCENE = preload("res://scenes/vfx/paw_print.tscn")
-var paw_dist_accum: float = 0.0
-var paw_side: int = 1
-
 const PALETTE_SHADER = preload("res://assets/shaders/palette_swap.gdshader")
 var actor_material: ShaderMaterial
 
@@ -57,7 +55,7 @@ func _ready() -> void:
 	actor_material.shader = PALETTE_SHADER
 	actor_material.set_shader_parameter("shadow_tint", Color(0.12, 0.08, 0.22, 1.0))
 	actor_material.set_shader_parameter("highlight_tint", Color(1.0, 0.88, 0.4, 1.0))
-	actor_material.set_shader_parameter("grading_strength", 0.25)
+	actor_material.set_shader_parameter("grading_strength", 0.15)
 	actor_material.set_shader_parameter("flash_color", Color(1.0, 0.25, 0.25, 1.0))
 	sprite.material = actor_material
 	
@@ -65,66 +63,156 @@ func _ready() -> void:
 	_update_equipped_weapons()
 	_update_magnet_radius()
 	_create_ground_shadow()
-	_setup_feline_eye_light()
+
+func _load_texture_robust(path: String) -> Texture2D:
+	# 1. Standart Godot ResourceLoader kontrolü
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		if res is Texture2D:
+			return res
+			
+	# 2. Doğrudan dosya sisteminden yükleme (Unimported PNG fallback)
+	if FileAccess.file_exists(path):
+		var img = Image.load_from_file(path)
+		if img and not img.is_empty():
+			return ImageTexture.create_from_image(img)
+			
+	# 3. Global işletim sistemi yolu ile yükleme
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img and not img.is_empty():
+			return ImageTexture.create_from_image(img)
+			
+	return null
 
 func _create_ground_shadow() -> void:
 	var shadow = Polygon2D.new()
 	var points = PackedVector2Array()
-	var rad_x = 16.0
-	var rad_y = 8.0
+	var rad_x = 18.0
+	var rad_y = 9.0
 	for i in range(12):
 		var angle = float(i) * TAU / 12.0
 		points.append(Vector2(cos(angle) * rad_x, sin(angle) * rad_y))
 	shadow.polygon = points
 	shadow.color = Color(0.02, 0.02, 0.06, 0.42)
-	shadow.position = Vector2(0, rad_y + 10.0)
+	shadow.position = Vector2(0, 18.0)
 	shadow.z_index = -1
 	add_child(shadow)
 	move_child(shadow, 0)
 
-func _setup_feline_eye_light() -> void:
-	var light_grad = Gradient.new()
-	light_grad.colors = PackedColorArray([Color(1.0, 0.95, 0.6, 1.0), Color(1.0, 0.95, 0.6, 0.0)])
-	light_grad.offsets = PackedFloat32Array([0.0, 1.0])
-	var light_tex = GradientTexture2D.new()
-	light_tex.gradient = light_grad
-	light_tex.fill = GradientTexture2D.FILL_RADIAL
-	light_tex.fill_from = Vector2(0.5, 0.5)
-	light_tex.fill_to = Vector2(0.5, 0.0)
-	light_tex.width = 256
-	light_tex.height = 256
-	
-	var eye_light = PointLight2D.new()
-	eye_light.texture = light_tex
-	eye_light.texture_scale = 1.8
-	eye_light.color = Color(1.0, 0.92, 0.55, 0.85)
-	eye_light.energy = 0.95
-	add_child(eye_light)
-
-
-
-
 func _load_all_sprites() -> void:
-	var rot_path = "res://assets/textures/player_character/rotations/"
-	var directions = ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"]
-	for d in directions:
-		var p = rot_path + d + ".png"
-		if ResourceLoader.exists(p):
-			idle_textures[d] = load(p)
+	hero_idle_rotations.clear()
+	hero_running_animations.clear()
+	
+	var base_rot_path = "res://assets/textures/karakedi_hero/rotations/"
+	var base_run_path = "res://assets/textures/karakedi_hero/animations/Running/"
+	
+	for dir in DIRECTIONS:
+		# Idle yönleri (rotations)
+		var rot_file = "%s%s.png" % [base_rot_path, dir]
+		var tex = _load_texture_robust(rot_file)
+		if not tex:
+			tex = _load_texture_robust("res://assets/textures/player_character/rotations/%s.png" % dir)
+		if tex:
+			hero_idle_rotations[dir] = tex
 			
-	if idle_textures.has("south"):
-		sprite.texture = idle_textures["south"]
-
-	var anim_base = "res://assets/textures/player_character/animations/Running/"
-	var run_dirs = ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"]
-	for d in run_dirs:
-		var frames: Array[Texture2D] = []
+		# Koşma animasyonu kareleri (Running animations - 8 kare)
+		var run_frames: Array[Texture2D] = []
 		for f in range(8):
-			var fp = "%s%s/frame_%03d.png" % [anim_base, d, f]
-			if ResourceLoader.exists(fp):
-				frames.append(load(fp))
-		if frames.size() > 0:
-			run_animations[d] = frames
+			var frame_file = "%s%s/frame_%03d.png" % [base_run_path, dir, f]
+			var f_tex = _load_texture_robust(frame_file)
+			if f_tex:
+				run_frames.append(f_tex)
+				
+		if run_frames.size() == 0 and tex != null:
+			run_frames.append(tex)
+		hero_running_animations[dir] = run_frames
+		
+	if hero_idle_rotations.has("south"):
+		sprite.texture = hero_idle_rotations["south"]
+	elif sprite.texture == null:
+		var fallback_tex = _load_texture_robust("res://assets/textures/player.png")
+		if fallback_tex:
+			sprite.texture = fallback_tex
+			
+	_update_weapon_slots_layout(current_facing)
+
+func _get_direction_8(vec: Vector2) -> String:
+	if vec.length_squared() < 0.001:
+		return current_facing
+	var angle = vec.angle()
+	var norm_angle = fposmod(angle + PI / 8.0, TAU)
+	var octant = int(norm_angle / (TAU / 8.0))
+	match octant:
+		0: return "east"
+		1: return "south-east"
+		2: return "south"
+		3: return "south-west"
+		4: return "west"
+		5: return "north-west"
+		6: return "north"
+		7: return "north-east"
+	return "south"
+
+func _update_weapon_slots_layout(direction: String) -> void:
+	match direction:
+		"south":
+			slot_right.position = Vector2(16, 6)
+			slot_right.z_index = 1
+			slot_left.position = Vector2(-16, 6)
+			slot_left.z_index = 1
+			slot_tail.position = Vector2(0, -10)
+			slot_tail.z_index = -1
+		"south-east":
+			slot_right.position = Vector2(16, 4)
+			slot_right.z_index = 1
+			slot_left.position = Vector2(-10, 8)
+			slot_left.z_index = 1
+			slot_tail.position = Vector2(-12, -8)
+			slot_tail.z_index = -1
+		"east":
+			slot_right.position = Vector2(16, 2)
+			slot_right.z_index = 1
+			slot_left.position = Vector2(-4, 4)
+			slot_left.z_index = -1
+			slot_tail.position = Vector2(-16, 0)
+			slot_tail.z_index = -1
+		"north-east":
+			slot_right.position = Vector2(14, -6)
+			slot_right.z_index = -1
+			slot_left.position = Vector2(-10, -2)
+			slot_left.z_index = -1
+			slot_tail.position = Vector2(-14, 8)
+			slot_tail.z_index = 1
+		"north":
+			slot_right.position = Vector2(14, -6)
+			slot_right.z_index = -1
+			slot_left.position = Vector2(-14, -6)
+			slot_left.z_index = -1
+			slot_tail.position = Vector2(0, 12)
+			slot_tail.z_index = 1
+		"north-west":
+			slot_right.position = Vector2(10, -2)
+			slot_right.z_index = -1
+			slot_left.position = Vector2(-14, -6)
+			slot_left.z_index = -1
+			slot_tail.position = Vector2(14, 8)
+			slot_tail.z_index = 1
+		"west":
+			slot_right.position = Vector2(4, 4)
+			slot_right.z_index = -1
+			slot_left.position = Vector2(-16, 2)
+			slot_left.z_index = 1
+			slot_tail.position = Vector2(16, 0)
+			slot_tail.z_index = -1
+		"south-west":
+			slot_right.position = Vector2(10, 8)
+			slot_right.z_index = 1
+			slot_left.position = Vector2(-16, 4)
+			slot_left.z_index = 1
+			slot_tail.position = Vector2(12, -8)
+			slot_tail.z_index = -1
 
 func _update_magnet_radius() -> void:
 	if magnet_col and magnet_col.shape is CircleShape2D:
@@ -169,13 +257,9 @@ func _physics_process(delta: float) -> void:
 	if input_dir.length() > 0.1:
 		velocity = input_dir * GameManager.move_speed
 		_process_movement_animation(input_dir, delta)
-		paw_dist_accum += velocity.length() * delta
-		if paw_dist_accum >= 24.0:
-			paw_dist_accum = 0.0
-			_spawn_paw_print(input_dir)
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, GameManager.move_speed * 6.0 * delta)
-		_process_idle_animation()
+		_process_idle_animation(delta)
 
 	# Geri tepme (Knockback) uygulama
 	if knockback_velocity.length() > 5.0:
@@ -196,56 +280,38 @@ func _physics_process(delta: float) -> void:
 				break
 
 func _process_movement_animation(dir: Vector2, delta: float) -> void:
-	var angle = dir.angle() # -PI ile PI arası
-	var new_dir = "south"
-	var mirror_h = false
+	current_facing = _get_direction_8(dir)
+	_update_weapon_slots_layout(current_facing)
 	
-	if angle >= -PI/8 and angle < PI/8:
-		new_dir = "east"
-	elif angle >= PI/8 and angle < 3*PI/8:
-		new_dir = "south-east"
-	elif angle >= 3*PI/8 and angle < 5*PI/8:
-		new_dir = "south"
-	elif angle >= 5*PI/8 and angle < 7*PI/8:
-		new_dir = "south-east"
-		mirror_h = true
-	elif angle >= 7*PI/8 or angle < -7*PI/8:
-		new_dir = "west" # Doğrudan sola yürüyüş animasyonu
-		mirror_h = false
-	elif angle >= -7*PI/8 and angle < -5*PI/8:
-		new_dir = "north-west"
-		mirror_h = false
-	elif angle >= -5*PI/8 and angle < -3*PI/8:
-		new_dir = "north" # Doğrudan yukarı 'W' yürüyüş animasyonu
-		mirror_h = false
-	elif angle >= -3*PI/8 and angle < -PI/8:
-		new_dir = "north-east"
-		mirror_h = false
-		
-	current_dir_name = new_dir
-	sprite.flip_h = mirror_h
+	# Dinamik kare süresi (Karakterin hızı arttıkça animasyon orantılı hızlanır)
+	var speed_ratio = clamp(GameManager.move_speed / 220.0, 0.7, 2.2)
+	var frame_dur = FRAME_DURATION / speed_ratio
 	
 	anim_timer += delta
-	if anim_timer >= FRAME_DURATION:
+	if anim_timer >= frame_dur:
 		anim_timer = 0.0
-		anim_frame_idx = (anim_frame_idx + 1) % 8
-		
-	if run_animations.has(new_dir):
-		var frames = run_animations[new_dir]
-		var safe_idx = anim_frame_idx % frames.size()
-		sprite.texture = frames[safe_idx]
-	elif idle_textures.has(new_dir):
-		sprite.texture = idle_textures[new_dir]
+		var frames: Array = hero_running_animations.get(current_facing, [])
+		if frames.size() > 0:
+			walk_frame_idx = (walk_frame_idx + 1) % frames.size()
+			sprite.texture = frames[walk_frame_idx]
+		elif hero_idle_rotations.has(current_facing):
+			sprite.texture = hero_idle_rotations[current_facing]
+			
+	# Koşarken hafif adım yaylanması (squash & stretch)
+	step_bob_timer += delta * speed_ratio * 18.0
+	var bob = sin(step_bob_timer) * 0.05
+	sprite.scale = Vector2(PLAYER_BASE_SCALE * (1.0 + bob), PLAYER_BASE_SCALE * (1.0 - bob))
 
-	sprite.scale = Vector2(PLAYER_BASE_SCALE, PLAYER_BASE_SCALE)
-
-func _process_idle_animation() -> void:
-	anim_frame_idx = 0
+func _process_idle_animation(delta: float = 0.016) -> void:
+	walk_frame_idx = 0
 	anim_timer = 0.0
+	step_bob_timer = 0.0
+	
+	if hero_idle_rotations.has(current_facing):
+		sprite.texture = hero_idle_rotations[current_facing]
+		
 	sprite.scale = Vector2(PLAYER_BASE_SCALE, PLAYER_BASE_SCALE)
-	sprite.position.y = 0.0
-	if idle_textures.has(current_dir_name):
-		sprite.texture = idle_textures[current_dir_name]
+	_update_weapon_slots_layout(current_facing)
 
 func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 180.0) -> void:
 	if i_frame_time > 0.0 or GameManager.is_game_over:
@@ -268,8 +334,6 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_for
 			1.0, 0.0, 0.22
 		).set_trans(Tween.TRANS_QUAD)
 
-
-
 func _on_hurtbox_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemy_hitbox") or area.is_in_group("enemy_hurtbox"):
 		var enemy = area.get_parent()
@@ -283,17 +347,6 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 func _on_magnet_area_entered(area: Area2D) -> void:
 	if area.is_in_group("collectibles") and area.has_method("start_attraction"):
 		area.start_attraction(self)
-
-func _spawn_paw_print(dir: Vector2) -> void:
-	if not PAW_PRINT_SCENE or not get_parent():
-		return
-	var p = PAW_PRINT_SCENE.instantiate()
-	p.global_position = global_position + Vector2(0, 8)
-	p.rotation = dir.angle() + PI / 2.0
-	p.side = paw_side
-	paw_side = -paw_side
-	get_parent().add_child(p)
-	get_parent().move_child(p, 1)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):

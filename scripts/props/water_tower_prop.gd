@@ -12,7 +12,7 @@ func _ready() -> void:
 	add_to_group("interactive_props")
 	current_hp = max_hp
 
-func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_force: float = 0.0, _is_crit: bool = false) -> void:
+func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_force: float = 0.0, _is_crit: bool = false, _source_weapon: String = "") -> void:
 	current_hp -= amount
 	if sprite:
 		var tw = create_tween()

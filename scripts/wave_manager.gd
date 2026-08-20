@@ -40,7 +40,7 @@ func _on_wave_started(wave_num: int) -> void:
 		
 	spawn_interval = max(0.22, 0.65 - float(wave_num - 1) * 0.03)
 	spawn_timer = 0.3
-	crate_spawn_timer = randf_range(7.0, 12.0)
+	crate_spawn_timer = 5.0 # Dalga başladıktan 5 sn sonra ilk sandık düşer
 	is_elite_spawned = false
 	active_boss_node = null
 	GameManager.is_wave_active = true
@@ -56,27 +56,50 @@ func spawn_rat_from_nest(nest_pos: Vector2) -> void:
 		get_parent().add_child(rat)
 
 func _setup_wave_props_and_nests(wave_num: int) -> void:
-	# Clean existing props
+	# Önceki dalgadan kalan kapakları ve etkileşimli nesneleri temizle
 	for n in get_tree().get_nodes_in_group("enemy_nests"):
 		n.queue_free()
 	for p in get_tree().get_nodes_in_group("interactive_props"):
 		p.queue_free()
 		
-	# Spawn 2 Rat Nests on rooftops
+	# Dalga numarasına göre dinamik lağım kapağı sayısı (Wave 1-2: 2, Wave 3-5: 3, Wave 6-9: 4, Wave 10+: 5)
+	var grate_count: int = 2
+	if wave_num >= 10:
+		grate_count = 5
+	elif wave_num >= 6:
+		grate_count = 4
+	elif wave_num >= 3:
+		grate_count = 3
+		
 	var nest_sc = load("res://scenes/props/rat_nest_spawner.tscn")
 	if nest_sc:
-		for i in range(2):
-			var nest = nest_sc.instantiate()
-			nest.global_position = Vector2(randf_range(-450, 450), randf_range(-700, 700))
-			get_parent().add_child(nest)
+		var spawned_positions: Array[Vector2] = []
+		for i in range(grate_count):
+			var pos = Vector2.ZERO
+			var attempts = 0
+			while attempts < 15:
+				pos = Vector2(randf_range(ARENA_MIN_X + 90, ARENA_MAX_X - 90), randf_range(ARENA_MIN_Y + 120, ARENA_MAX_Y - 120))
+				var too_close = false
+				for other_pos in spawned_positions:
+					if pos.distance_to(other_pos) < 180.0:
+						too_close = true
+						break
+				if not too_close:
+					break
+				attempts += 1
+			spawned_positions.append(pos)
 			
-	# Spawn 2 Water Towers
-	var wt_sc = load("res://scenes/props/water_tower_prop.tscn")
-	if wt_sc:
+			var nest = nest_sc.instantiate()
+			nest.global_position = pos
+			get_parent().call_deferred("add_child", nest)
+			
+	# Spawn 2 Patlayıcı Gaz / Yangın Tüpü (Kırılabilir/Patlayabilir)
+	var tank_sc = load("res://scenes/props/explosive_gas_tank.tscn")
+	if tank_sc:
 		for i in range(2):
-			var wt = wt_sc.instantiate()
-			wt.global_position = Vector2(randf_range(-400, 400), randf_range(-650, 650))
-			get_parent().add_child(wt)
+			var tank = tank_sc.instantiate()
+			tank.global_position = Vector2(randf_range(-380, 380), randf_range(-600, 600))
+			get_parent().call_deferred("add_child", tank)
 			
 	# Spawn Stray Cat Ally companion on wave 3+
 	if wave_num >= 3 and get_tree().get_nodes_in_group("allies").size() == 0:
@@ -98,11 +121,11 @@ func _process(delta: float) -> void:
 	wave_time_left -= delta
 	time_updated.emit(max(0.0, wave_time_left))
 	
-	# Dinamik Hediye Sandığı Doğuşu
+	# Dinamik Hediye Sandığı Doğuşu (Her 10-15 sn'de bir yeni sandık)
 	crate_spawn_timer -= delta
 	if crate_spawn_timer <= 0.0:
 		_spawn_loot_crate()
-		crate_spawn_timer = randf_range(16.0, 24.0)
+		crate_spawn_timer = randf_range(10.0, 15.0)
 	
 	# Boss Doğuşu (Dalga 5, 10 & 15)
 	if (GameManager.current_wave == 5 or GameManager.current_wave == 10 or GameManager.current_wave == 15) and not is_elite_spawned and wave_time_left <= 35.0:
@@ -115,7 +138,7 @@ func _process(delta: float) -> void:
 		
 	# Dalga Sonu Kontrolü: Boss hayattaysa süre bitse bile dalga bitmez!
 	if wave_time_left <= 0.0:
-		if is_instance_valid(active_boss_node) and not active_boss_node.is_dead:
+		if is_instance_valid(active_boss_node) and not active_boss_node.get("is_dead"):
 			pass # Boss ölene kadar bekle
 		else:
 			_end_wave()
@@ -128,7 +151,7 @@ func _process(delta: float) -> void:
 
 func _spawn_loot_crate() -> void:
 	var existing_crates = get_tree().get_nodes_in_group("crates")
-	if existing_crates.size() >= 2:
+	if existing_crates.size() >= 3:
 		return
 	if LOOT_CRATE_SCENE:
 		var crate = LOOT_CRATE_SCENE.instantiate()

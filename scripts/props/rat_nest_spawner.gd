@@ -1,90 +1,42 @@
-extends StaticBody2D
+extends Node2D
 
-## Lağım ve Havalandırma Fare Yuvası (Rat Nest Spawner)
-## Yok edilebilir, oyuncu yaklaştıkça fare üretimini hızlandıran ve yok edildiğinde yüksek miktar Whiskers düşüren yapı.
+## Çatı Havalandırma / Kanalizasyon Izgarası (Rat Nest Spawner)
+## Dalga boyunca fare sürüsü fırlatır. Hasar verilemez/kırılamaz.
+## Karakter üzerinden engelsizce geçebilir ve hasar almaz.
 
-signal nest_destroyed(position: Vector2)
-
-@export var max_hp: float = 120.0
-var current_hp: float = 120.0
-@export var base_spawn_interval: float = 4.0
-@export var active_spawn_interval: float = 1.2
-@export var warning_radius: float = 220.0
-
-var spawn_timer: float = 0.0
-var is_player_nearby: bool = false
-var player_ref: Node2D = null
+@export var spawn_interval: float = 4.2
+var spawn_timer: float = 2.0
 
 @onready var sprite: Sprite2D = $Sprite2D
-@onready var warning_circle: Line2D = $WarningCircle
 
 func _ready() -> void:
 	add_to_group("enemy_nests")
-	current_hp = max_hp
-	_setup_warning_circle()
-
-func _setup_warning_circle() -> void:
-	if not warning_circle:
-		warning_circle = Line2D.new()
-		warning_circle.width = 3.0
-		warning_circle.default_color = Color(1.0, 0.2, 0.2, 0.4)
-		add_child(warning_circle)
-		
-	var points = PackedVector2Array()
-	var num_points = 32
-	for i in range(num_points + 1):
-		var angle = (float(i) / num_points) * TAU
-		points.append(Vector2(cos(angle), sin(angle)) * warning_radius)
-	warning_circle.points = points
+	z_index = -4
+	z_as_relative = false
+	if sprite:
+		sprite.z_index = 0
+		sprite.z_as_relative = true
+	spawn_timer = randf_range(2.0, 4.0)
 
 func _process(delta: float) -> void:
-	if not player_ref:
-		player_ref = get_tree().get_first_node_in_group("player")
+	if not GameManager.is_wave_active or GameManager.is_game_over:
 		return
 		
-	var dist = global_position.distance_to(player_ref.global_position)
-	is_player_nearby = dist <= warning_radius
-	
-	if warning_circle:
-		warning_circle.default_color.a = 0.85 if is_player_nearby else 0.35
-		
-	var current_interval = active_spawn_interval if is_player_nearby else base_spawn_interval
-	spawn_timer += delta
-	if spawn_timer >= current_interval:
-		spawn_timer = 0.0
+	spawn_timer -= delta
+	if spawn_timer <= 0.0:
+		spawn_timer = spawn_interval
 		_spawn_rat_pack()
 
 func _spawn_rat_pack() -> void:
+	# Kapak sarsılma / titreme efekti
+	if sprite:
+		var tw = create_tween()
+		tw.tween_property(sprite, "scale", Vector2(1.25, 0.8), 0.08)
+		tw.tween_property(sprite, "scale", Vector2(0.9, 1.15), 0.08)
+		tw.tween_property(sprite, "scale", Vector2.ONE, 0.1).set_trans(Tween.TRANS_ELASTIC)
+		tw.tween_property(sprite, "modulate", Color(2.0, 0.5, 0.5), 0.1)
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+		
 	var wave_mgr = get_tree().get_first_node_in_group("wave_manager")
 	if wave_mgr and wave_mgr.has_method("spawn_rat_from_nest"):
 		wave_mgr.spawn_rat_from_nest(global_position)
-
-func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_force: float = 0.0, _is_crit: bool = false) -> void:
-	current_hp -= amount
-	
-	# Flash effect
-	if sprite:
-		var tw = create_tween()
-		tw.tween_property(sprite, "modulate", Color(2.5, 0.5, 0.5), 0.08)
-		tw.tween_property(sprite, "modulate", Color(0.35, 0.15, 0.25, 1.0), 0.08)
-		
-	if current_hp <= 0.0:
-		_destroy_nest()
-
-func _destroy_nest() -> void:
-	SoundManager.play_explosion()
-	nest_destroyed.emit(global_position)
-	
-	# Drop lots of coins & Whiskers
-	GameManager.whiskers += 15
-	GameManager.add_coins(35)
-	
-	# Floating text
-	var ft_sc = load("res://scenes/vfx/floating_text.tscn")
-	if ft_sc:
-		var ft = ft_sc.instantiate()
-		ft.global_position = global_position
-		get_parent().add_child(ft)
-		ft.setup("💥 YUVA İMHASI! +15 🥫", Color(1.0, 0.85, 0.2), 15, true)
-		
-	queue_free()

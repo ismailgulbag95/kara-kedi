@@ -1,11 +1,11 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene format=3 uid="uid://ioxcxu2g7duw"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="Texture2D" path="res://assets/textures/topdown_rooftop_floor.png" id="2_floor"]
-[ext_resource type="Texture2D" path="res://assets/textures/topdown_parapet_ledge.png" id="3_parapet"]
-[ext_resource type="Script" path="res://scripts/props/city_depth_manager.gd" id="4_city_depth"]
+[ext_resource type="Script" uid="uid://w13g8610ha6c" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Texture2D" uid="uid://bloguqm7y6vh2" path="res://assets/textures/topdown_rooftop_floor.png" id="2_floor"]
+[ext_resource type="Texture2D" uid="uid://cgjecoyldw4j0" path="res://assets/textures/topdown_parapet_ledge.png" id="3_parapet"]
+[ext_resource type="Script" uid="uid://drnv3t78naw1o" path="res://scripts/props/city_depth_manager.gd" id="4_city_depth"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="5_player"]
-[ext_resource type="Script" path="res://scripts/wave_manager.gd" id="6_wave"]
+[ext_resource type="Script" uid="uid://sa0ri1xf4kfq" path="res://scripts/wave_manager.gd" id="6_wave"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="7_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/virtual_joystick.tscn" id="8_vjoy"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop.tscn" id="9_shop"]
@@ -13,11 +13,17 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="11_gover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="12_vict"]
 [ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="13_menu"]
-[ext_resource type="Shader" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="14_vignette"]
+[ext_resource type="Shader" uid="uid://b6thkf8se03tv" path="res://assets/shaders/retro_crt_postprocess.gdshader" id="14_vignette"]
 [ext_resource type="PackedScene" path="res://scenes/ui/level_up_draft.tscn" id="15_ldraft"]
 [ext_resource type="PackedScene" path="res://scenes/ui/codex_modal.tscn" id="16_codex"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shelter_modal.tscn" id="17_shelter"]
-[ext_resource type="Script" path="res://scripts/globals/environment_manager.gd" id="18_env"]
+[ext_resource type="Script" uid="uid://bfe6iik5ixoyc" path="res://scripts/globals/environment_manager.gd" id="18_env"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_horiz"]
+size = Vector2(1440, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vert"]
+size = Vector2(64, 2100)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("14_vignette")
@@ -26,19 +32,14 @@ shader_parameter/vignette_radius = 0.88
 shader_parameter/scanline_count = 300.0
 shader_parameter/scanline_intensity = 0.05
 shader_parameter/chromatic_aberration = 0.0
+shader_parameter/rage_tint = Color(0.1, 1, 0.4, 0)
 shader_parameter/rage_intensity = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_horiz"]
-size = Vector2(1440, 64)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vert"]
-size = Vector2(64, 2100)
-
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1130003626]
 script = ExtResource("1_main")
 
-[node name="OuterDeepStreet" type="TextureRect" parent="."]
-modulate = Color(0.08, 0.10, 0.15, 1)
+[node name="OuterDeepStreet" type="TextureRect" parent="." unique_id=140560335]
+modulate = Color(0.08, 0.1, 0.15, 1)
 texture_repeat = 2
 offset_left = -3600.0
 offset_top = -3600.0
@@ -47,20 +48,20 @@ offset_bottom = 3600.0
 texture = ExtResource("2_floor")
 stretch_mode = 1
 
-[node name="CityDepthManager" type="Node2D" parent="."]
+[node name="CityDepthManager" type="Node2D" parent="." unique_id=15782759]
 script = ExtResource("4_city_depth")
 
-[node name="EnvironmentManager" type="Node2D" parent="."]
+[node name="EnvironmentManager" type="Node2D" parent="." unique_id=2081141224]
 script = ExtResource("18_env")
 
-[node name="RooftopAbyssShadow" type="ColorRect" parent="."]
+[node name="RooftopAbyssShadow" type="ColorRect" parent="." unique_id=1151889764]
 offset_left = -745.0
 offset_top = -1075.0
 offset_right = 745.0
 offset_bottom = 1075.0
 color = Color(0.01, 0.01, 0.03, 0.94)
 
-[node name="RooftopFloor" type="TextureRect" parent="."]
+[node name="RooftopFloor" type="TextureRect" parent="." unique_id=1678488442]
 modulate = Color(0.85, 0.88, 0.95, 1)
 texture_repeat = 2
 offset_left = -680.0
@@ -70,8 +71,8 @@ offset_bottom = 1020.0
 texture = ExtResource("2_floor")
 stretch_mode = 1
 
-[node name="ParapetVisualTop" type="TextureRect" parent="."]
-modulate = Color(0.92, 0.95, 1.0, 1)
+[node name="ParapetVisualTop" type="TextureRect" parent="." unique_id=1233267343]
+modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
@@ -80,8 +81,8 @@ offset_bottom = -976.0
 texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="ParapetVisualBottom" type="TextureRect" parent="."]
-modulate = Color(0.92, 0.95, 1.0, 1)
+[node name="ParapetVisualBottom" type="TextureRect" parent="." unique_id=1300527701]
+modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = 976.0
@@ -90,8 +91,8 @@ offset_bottom = 1040.0
 texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="ParapetVisualLeft" type="TextureRect" parent="."]
-modulate = Color(0.92, 0.95, 1.0, 1)
+[node name="ParapetVisualLeft" type="TextureRect" parent="." unique_id=1865802659]
+modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = -720.0
 offset_top = -1040.0
@@ -100,8 +101,8 @@ offset_bottom = 1040.0
 texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="ParapetVisualRight" type="TextureRect" parent="."]
-modulate = Color(0.92, 0.95, 1.0, 1)
+[node name="ParapetVisualRight" type="TextureRect" parent="." unique_id=1272854192]
+modulate = Color(0.92, 0.95, 1, 1)
 texture_repeat = 2
 offset_left = 656.0
 offset_top = -1040.0
@@ -110,44 +111,44 @@ offset_bottom = 1040.0
 texture = ExtResource("3_parapet")
 stretch_mode = 1
 
-[node name="ArenaWalls" type="StaticBody2D" parent="."]
+[node name="ArenaWalls" type="StaticBody2D" parent="." unique_id=507343763]
 collision_layer = 32
 collision_mask = 3
 
-[node name="WallTop" type="CollisionShape2D" parent="ArenaWalls"]
+[node name="WallTop" type="CollisionShape2D" parent="ArenaWalls" unique_id=1818173898]
 position = Vector2(0, -1008)
 shape = SubResource("RectangleShape2D_horiz")
 
-[node name="WallBottom" type="CollisionShape2D" parent="ArenaWalls"]
+[node name="WallBottom" type="CollisionShape2D" parent="ArenaWalls" unique_id=310006661]
 position = Vector2(0, 1008)
 shape = SubResource("RectangleShape2D_horiz")
 
-[node name="WallLeft" type="CollisionShape2D" parent="ArenaWalls"]
+[node name="WallLeft" type="CollisionShape2D" parent="ArenaWalls" unique_id=1361663397]
 position = Vector2(-688, 0)
 shape = SubResource("RectangleShape2D_vert")
 
-[node name="WallRight" type="CollisionShape2D" parent="ArenaWalls"]
+[node name="WallRight" type="CollisionShape2D" parent="ArenaWalls" unique_id=779120324]
 position = Vector2(688, 0)
 shape = SubResource("RectangleShape2D_vert")
 
-[node name="Player" parent="." instance=ExtResource("5_player")]
+[node name="Player" parent="." unique_id=1555492057 instance=ExtResource("5_player")]
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position_smoothing_enabled = true
-position_smoothing_speed = 7.0
+[node name="Camera2D" type="Camera2D" parent="." unique_id=236739762]
 limit_left = -980
 limit_top = -1350
 limit_right = 980
 limit_bottom = 1350
 limit_smoothed = true
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
 
-[node name="WaveManager" type="Node2D" parent="."]
+[node name="WaveManager" type="Node2D" parent="." unique_id=1253457408]
 script = ExtResource("6_wave")
 
-[node name="VignetteOverlay" type="CanvasLayer" parent="."]
+[node name="VignetteOverlay" type="CanvasLayer" parent="." unique_id=688120481]
 layer = 4
 
-[node name="ColorRect" type="ColorRect" parent="VignetteOverlay"]
+[node name="ColorRect" type="ColorRect" parent="VignetteOverlay" unique_id=416482452]
 material = SubResource("ShaderMaterial_vignette")
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,31 +157,24 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="VirtualJoystick" parent="." instance=ExtResource("8_vjoy")]
+[node name="VirtualJoystick" parent="." unique_id=1024285117 instance=ExtResource("8_vjoy")]
 
-[node name="HUD" parent="." instance=ExtResource("7_hud")]
+[node name="HUD" parent="." unique_id=1226637654 instance=ExtResource("7_hud")]
 layer = 8
 
-[node name="Shop" parent="." instance=ExtResource("9_shop")]
-layer = 10
+[node name="Shop" parent="." unique_id=172438598 instance=ExtResource("9_shop")]
 
-[node name="LevelUpDraft" parent="." instance=ExtResource("15_ldraft")]
-layer = 12
+[node name="LevelUpDraft" parent="." unique_id=169959118 instance=ExtResource("15_ldraft")]
 
-[node name="PauseMenu" parent="." instance=ExtResource("10_pause")]
-layer = 15
+[node name="PauseMenu" parent="." unique_id=759105736 instance=ExtResource("10_pause")]
 
-[node name="GameOver" parent="." instance=ExtResource("11_gover")]
-layer = 20
+[node name="GameOver" parent="." unique_id=2134752697 instance=ExtResource("11_gover")]
 
-[node name="VictoryScreen" parent="." instance=ExtResource("12_vict")]
-layer = 25
+[node name="VictoryScreen" parent="." unique_id=1592295432 instance=ExtResource("12_vict")]
 
-[node name="MainMenu" parent="." instance=ExtResource("13_menu")]
-layer = 30
+[node name="MainMenu" parent="." unique_id=1673265190 instance=ExtResource("13_menu")]
 
-[node name="CodexModal" parent="." instance=ExtResource("16_codex")]
-layer = 35
+[node name="CodexModal" parent="." unique_id=1246068966 instance=ExtResource("16_codex")]
 
-[node name="ShelterModal" parent="." instance=ExtResource("17_shelter")]
+[node name="ShelterModal" parent="." unique_id=717306528 instance=ExtResource("17_shelter")]
 layer = 38

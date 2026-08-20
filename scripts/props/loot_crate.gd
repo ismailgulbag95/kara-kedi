@@ -39,9 +39,8 @@ func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_f
 	if ft_scene:
 		var ft = ft_scene.instantiate()
 		ft.global_position = global_position + Vector2(randf_range(-10, 10), -12)
-		ft.text = str(int(amount))
-		ft.color = Color(1.0, 0.8, 0.5)
 		get_parent().add_child(ft)
+		ft.setup(str(int(amount)), Color(1.0, 0.8, 0.5), 14, false)
 		
 	if current_health <= 0.0:
 		_break_crate()

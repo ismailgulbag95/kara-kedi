@@ -24,6 +24,7 @@ var danger_tween: Tween
 var last_second_int: int = -1
 
 func _ready() -> void:
+	add_to_group("hud")
 	GameManager.coins_changed.connect(_on_coins_changed)
 	GameManager.health_changed.connect(_on_health_changed)
 	GameManager.wave_started.connect(_on_wave_started)
@@ -35,6 +36,51 @@ func _ready() -> void:
 	_setup_danger_rect()
 	_setup_rage_ui()
 	_update_all()
+
+func show_wave_announcement(msg: String) -> void:
+	var banner = PanelContainer.new()
+	banner.custom_minimum_size = Vector2(460, 60)
+	banner.set_anchors_preset(Control.PRESET_CENTER)
+	banner.position = Vector2($Control.size.x * 0.5 - 230, $Control.size.y * 0.28)
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.16, 0.04, 0.04, 0.95)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(1.0, 0.2, 0.2, 1.0)
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_right = 10
+	style.corner_radius_bottom_left = 10
+	style.shadow_color = Color(1.0, 0.1, 0.1, 0.5)
+	style.shadow_size = 14
+	banner.add_theme_stylebox_override("panel", style)
+	
+	var lbl = Label.new()
+	lbl.text = msg
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
+	lbl.add_theme_constant_override("outline_size", 2)
+	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	banner.add_child(lbl)
+	
+	$Control.add_child(banner)
+	banner.pivot_offset = Vector2(230, 30)
+	banner.scale = Vector2(0.6, 0.6)
+	banner.modulate.a = 0.0
+	
+	var tw = create_tween()
+	tw.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.set_ignore_time_scale(true)
+	tw.tween_property(banner, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(banner, "modulate:a", 1.0, 0.15)
+	tw.tween_interval(2.2)
+	tw.tween_property(banner, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(banner.queue_free)
 
 func _setup_danger_rect() -> void:
 	danger_rect = ColorRect.new()

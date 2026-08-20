@@ -29,6 +29,7 @@ const ARENA_MIN_Y: float = -950.0
 const ARENA_MAX_Y: float = 950.0
 
 func _ready() -> void:
+	add_to_group("wave_manager")
 	GameManager.wave_started.connect(_on_wave_started)
 
 func _on_wave_started(wave_num: int) -> void:

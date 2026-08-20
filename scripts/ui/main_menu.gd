@@ -27,11 +27,15 @@ func _ready() -> void:
 	_setup_codex_button()
 	_setup_shelter_button()
 	_setup_class_button(btn_standard, card_standard, "standard")
+	_setup_class_button(btn_marksman, card_marksman, "marksman")
+	_setup_class_button(btn_brawler, card_brawler, "brawler")
+	_setup_class_button(btn_tank, card_tank, "tank")
+	_setup_class_button(btn_pirate, card_pirate, "pirate")
 
 func _setup_shelter_button() -> void:
 	var s_btn = Button.new()
 	s_btn.text = "🛖 BARINAK (MAMA AĞACI)"
-	s_btn.custom_minimum_size = Vector2(0, 34)
+	s_btn.custom_minimum_size = Vector2(0, 36)
 	s_btn.anchor_left = 0.0
 	s_btn.anchor_top = 1.0
 	s_btn.anchor_right = 0.5
@@ -39,7 +43,7 @@ func _setup_shelter_button() -> void:
 	s_btn.offset_left = 12
 	s_btn.offset_right = -6
 	s_btn.offset_top = -48
-	s_btn.offset_bottom = -14
+	s_btn.offset_bottom = -12
 	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.18, 0.14, 0.08, 0.95)
@@ -63,15 +67,11 @@ func _setup_shelter_button() -> void:
 			root.get_node("ShelterModal").open_shelter()
 	)
 	panel.add_child(s_btn)
-	_setup_class_button(btn_marksman, card_marksman, "marksman")
-	_setup_class_button(btn_brawler, card_brawler, "brawler")
-	_setup_class_button(btn_tank, card_tank, "tank")
-	_setup_class_button(btn_pirate, card_pirate, "pirate")
 
 func _setup_codex_button() -> void:
 	var c_btn = Button.new()
 	c_btn.text = "📖 SOKAK GÜNCESİ (CODEX)"
-	c_btn.custom_minimum_size = Vector2(0, 34)
+	c_btn.custom_minimum_size = Vector2(0, 36)
 	c_btn.anchor_left = 0.5
 	c_btn.anchor_top = 1.0
 	c_btn.anchor_right = 1.0
@@ -79,7 +79,7 @@ func _setup_codex_button() -> void:
 	c_btn.offset_left = 6
 	c_btn.offset_right = -12
 	c_btn.offset_top = -48
-	c_btn.offset_bottom = -14
+	c_btn.offset_bottom = -12
 	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.10, 0.14, 0.22, 0.95)

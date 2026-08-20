@@ -12,7 +12,7 @@ func _ready() -> void:
 	add_to_group("interactive_props")
 	current_hp = max_hp
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_force: float = 0.0, _is_crit: bool = false) -> void:
 	current_hp -= amount
 	if sprite:
 		var tw = create_tween()
@@ -42,7 +42,7 @@ func _break_water_tower() -> void:
 			if dist <= 350.0:
 				var push_dir = (e.global_position - global_position).normalized()
 				if e.has_method("take_damage"):
-					e.take_damage(80.0)
+					e.take_damage(80.0, push_dir, 450.0)
 				if "velocity" in e:
 					e.velocity += push_dir * 450.0
 					

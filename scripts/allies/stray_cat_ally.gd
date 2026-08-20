@@ -48,7 +48,8 @@ func _try_attack_nearest_rat() -> void:
 	if nearest:
 		attack_timer = 0.0
 		if nearest.has_method("take_damage"):
-			nearest.take_damage(attack_damage)
+			var k_dir = (nearest.global_position - global_position).normalized()
+			nearest.take_damage(attack_damage, k_dir, 160.0)
 		SoundManager.play_meow(1.2)
 		
 		# Visual slash arc

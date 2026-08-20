@@ -109,7 +109,7 @@ func _calculate_separation() -> Vector2:
 				separation += diff.normalized() / dist
 	return separation.normalized()
 
-func take_damage(amount: float, knockback_dir: Vector2, knock_force: float, is_crit: bool = false) -> void:
+func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knock_force: float = 0.0, is_crit: bool = false) -> void:
 	if is_dead:
 		return
 		
@@ -175,7 +175,7 @@ func _die() -> void:
 	GameManager.add_feline_rage(3.5)
 	
 	# Düşman ölüm sarsıntısı & mikro hitstop
-	if has_node("BossHpBar") or get("is_boss") if has_method("get") else false:
+	if is_in_group("boss") or has_node("BossHpBar"):
 		GameManager.request_screen_shake(0.65)
 		GameManager.hitstop(0.08, 0.04)
 	elif randf() < 0.25:

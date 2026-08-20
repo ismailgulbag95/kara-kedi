@@ -38,6 +38,9 @@ func _process(delta: float) -> void:
 		if global_position.distance_to(target_player.global_position) < 24.0:
 			_collect()
 
+func start_attraction(player_ref: Node2D) -> void:
+	target_player = player_ref
+
 func _on_area_entered(area: Area2D) -> void:
 	if area.name == "MagnetArea":
 		target_player = area.get_parent()
@@ -61,9 +64,8 @@ func _collect() -> void:
 	if ft_scene:
 		var ft = ft_scene.instantiate()
 		ft.global_position = global_position + Vector2(0, -15)
-		ft.text = "+%d CAN 🥛" % int(heal_amount)
-		ft.color = Color(0.2, 0.95, 0.4)
 		get_parent().add_child(ft)
+		ft.setup("+%d CAN 🥛" % int(heal_amount), Color(0.2, 0.95, 0.4), 14, false)
 		
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2.ZERO, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)

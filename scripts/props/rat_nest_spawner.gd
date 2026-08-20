@@ -59,7 +59,7 @@ func _spawn_rat_pack() -> void:
 	if wave_mgr and wave_mgr.has_method("spawn_rat_from_nest"):
 		wave_mgr.spawn_rat_from_nest(global_position)
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO, _knock_force: float = 0.0, _is_crit: bool = false) -> void:
 	current_hp -= amount
 	
 	# Flash effect
@@ -84,7 +84,7 @@ func _destroy_nest() -> void:
 	if ft_sc:
 		var ft = ft_sc.instantiate()
 		ft.global_position = global_position
-		ft.set_text("💥 YUVA İMHASI! +15 🥫", Color(1.0, 0.85, 0.2))
 		get_parent().add_child(ft)
+		ft.setup("💥 YUVA İMHASI! +15 🥫", Color(1.0, 0.85, 0.2), 15, true)
 		
 	queue_free()
